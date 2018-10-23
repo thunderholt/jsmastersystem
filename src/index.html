@@ -1,0 +1,139 @@
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+		body {
+			margin: 0px;
+			background-color: #0C001C;
+			color: #fff;
+			font-family: verdana;
+			font-size: 12px;
+		}
+
+		h1 {
+			display: inline;
+			font-size: 12px;
+			font-weight: bold;
+			margin: 0px;
+			margin-right: 20px;
+			color: #C1CAFF;
+		}
+
+		#sms-canvas-container {
+			width: 256px; 
+			height: 192px;
+			margin-top: calc((100vh - 192px - 8px) / 2);
+
+			margin-left: auto;
+			margin-right: auto;
+			display: block;
+			border: solid #333333 4px;
+			border-radius: 8px;
+
+			-webkit-box-shadow: 0px 0px 5px 5px rgba(0,0,0,0.75);
+			-moz-box-shadow: 0px 0px 5px 5px rgba(0,0,0,0.75);
+			box-shadow: 0px 0px 5px 5px rgba(0,0,0,0.75);
+		}
+
+		#sms-canvas {
+			width: 100%;
+			height: 100%;
+			background-color: #000;
+		}
+
+		@media (min-width: 522px) and (min-height: 434px) {
+			#sms-canvas-container {
+				width: 512px; height: 384px;
+				margin-top: calc((100vh - 384px - 8px) / 2);
+			}
+		}
+
+		@media (min-width: 778px) and (min-height: 626px) {
+			#sms-canvas-container {
+				width: 768px; height: 576px;
+				margin-top: calc((100vh - 576px - 8px) / 2);
+			}
+		}
+
+		@media (min-width: 1034px) and (min-height: 818px) {
+			#sms-canvas-container {
+				width: 1024px; height: 768px;
+				margin-top: calc((100vh - 768px - 8px) / 2);
+			}
+		}
+
+		@media (min-width: 1380px) and (min-height: 1100px) {
+			#sms-canvas-container {
+				width: 1280px; height: 960px;
+				margin-top: calc((100vh - 960px - 8px) / 2);
+			}
+		}
+
+		button {
+			background-color: #333333;
+			color: #fff;
+			border: none;
+			border-radius: 6px;
+			padding: 4px 8px;
+		}
+
+		#tool-bar {
+			width: 100%;
+			height: 31px;
+			position: fixed;
+			top: 0px;
+			left: 0px;
+			background-color: #000;
+			box-sizing: border-box;
+			padding: 4px;
+		}
+
+		/*#tool-bar .left {
+			display: inline-block;
+			width: 49%;
+		}
+
+		#tool-bar .right {
+			display: inline-block;
+			width: 49%;
+			text-align: right;
+		}*/
+
+		#mem-dump {
+			color: #fff;
+		}
+	</style>
+</head>
+<body>
+
+	<div id="tool-bar">
+		<h1>Andy's Sega Master System Emulator</h1>
+
+		<label for="romFileInput">Load ROM (.sms)</label>
+		<input type="file" id="romFileInput" onchange="sms.loadRom()" />
+		<button onclick="sms.enterFullscreen()">Full Screen</button>
+		<button onclick="sms.mmc.dump()">Dump RAM</button>
+		<!--<button onclick="sms.mmc.stash()">Stash RAM</button>
+		<button onclick="sms.mmc.diffStash()">Diff RAM</button>-->
+		<!--<button onclick="sms.loadRom()">Load ROM</button>-->
+		Frame duration: <span id="frameDuration">-</span>
+	</div>
+
+	<div id="sms-canvas-container">
+		<canvas id="sms-canvas" style="image-rendering: pixelated; image-rendering: -moz-crisp-edges;" width="256" height="192"></canvas>
+	</div>
+
+	<pre id="mem-dump"></pre>
+
+	<script src="js/sms.js"></script>
+	<script src="js/cpu.js"></script>
+	<script src="js/mmc.js"></script>
+	<script src="js/ioc.js"></script>
+	<script src="js/vdp.js"></script>
+	<script src="js/joypads.js"></script>
+	<script src="js/audio.js"></script>
+	<script src="js/util.js"></script>
+	<script src="js/const.js"></script>
+	<script src="js/start.js"></script>
+</body>
+</html>
