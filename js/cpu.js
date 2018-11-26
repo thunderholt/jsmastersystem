@@ -1481,6 +1481,8 @@ function Cpu() {
 	// otdr
 	eocf[0xbb] = function () { return executeOutDecrementRepeat(); }
 	
+	// in a,(c)
+	eocf[0x78] = function () { r.a = self.ioc.readByte(r.c); return 12; }
 	// in b,(c)
 	eocf[0x40] = function () { r.b = self.ioc.readByte(r.c); return 12; }
 	// in c,(c)
@@ -1595,6 +1597,10 @@ function Cpu() {
 	// neg
 	eocf[0x47] = function () { r.a = sub_8bit(0, r.a); return 8; }
 
+	// ld i,a
+	eocf[0x47] = function () { r.r = r.a; return 9; }
+	// ld a,i
+	eocf[0x57] = function () { r.a = r.r; return 9; }
 	// ld r,a
 	eocf[0x4f] = function () { r.r = r.a; return 9; }
 	// ld a,r
@@ -1646,6 +1652,41 @@ function Cpu() {
 	ixocf[0x66] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_ix() + disp) & 0xffff; r.h = rb(address); return 19; }
 	// ld l,(ix+*)
 	ixocf[0x6e] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_ix() + disp) & 0xffff; r.l = rb(address); return 19; }
+
+	// ld ixl,a
+	ixocf[0x6f] = function () { r.ixl = r.a; return 8; }
+	// ld ixl,b
+	ixocf[0x68] = function () { r.ixl = r.b; return 8; }
+	// ld ixl,c
+	ixocf[0x69] = function () { r.ixl = r.c; return 8; }
+	// ld ixl,d
+	ixocf[0x6a] = function () { r.ixl = r.d; return 8; }
+	// ld ixl,e
+	ixocf[0x6b] = function () { r.ixl = r.e; return 8; }
+	// ld ixl,ixh
+	ixocf[0x6c] = function () { r.ixl = r.ixh; return 8; }
+	// ld ixl,ixl
+	ixocf[0x6d] = function () { r.ixl = r.ixl; return 8; }
+
+	// ld ixh,a
+	ixocf[0x67] = function () { r.ixh = r.a; return 8; }
+	// ld ixh,b
+	ixocf[0x60] = function () { r.ixh = r.b; return 8; }
+	// ld ixh,c
+	ixocf[0x61] = function () { r.ixh = r.c; return 8; }
+	// ld ixh,d
+	ixocf[0x62] = function () { r.ixh = r.d; return 8; }
+	// ld ixh,e
+	ixocf[0x63] = function () { r.ixh = r.e; return 8; }
+	// ld ixh,ixh
+	ixocf[0x64] = function () { r.ixh = r.ixh; return 8; }
+	// ld ixh,ixl
+	ixocf[0x65] = function () { r.ixh = r.ixl; return 8; }
+
+	// ld a,ixh
+	ixocf[0x7c] = function () { r.a = r.ixh; return 8; }
+	// ld a,ixl
+	ixocf[0x7d] = function () { r.a = r.ixl; return 8; }
 
 	// inc ix
 	ixocf[0x23] = function () { set_ix(inc_16bit(get_ix())); return 10; }
@@ -1705,6 +1746,9 @@ function Cpu() {
 	// ex (sp),ix
 	ixocf[0xe3] = function () { return executeExchangeSpIx(); }
 
+	// jp (ix)
+	ixocf[0xe9] = function () { r.pc = get_ix(); return 8; }
+
 	////////////////////////////// IY Opcodes //////////////////////////////
 
 	// ld iy,**
@@ -1751,6 +1795,41 @@ function Cpu() {
 	iyocf[0x66] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_iy() + disp) & 0xffff; r.h = rb(address); return 19; }
 	// ld l,(iy+*)
 	iyocf[0x6e] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_iy() + disp) & 0xffff; r.l = rb(address); return 19; }
+
+	// ld iyl,a
+	iyocf[0x6f] = function () { r.iyl = r.a; return 8; }
+	// ld iyl,b
+	iyocf[0x68] = function () { r.iyl = r.b; return 8; }
+	// ld iyl,c
+	iyocf[0x69] = function () { r.iyl = r.c; return 8; }
+	// ld iyl,d
+	iyocf[0x6a] = function () { r.iyl = r.d; return 8; }
+	// ld iyl,e
+	iyocf[0x6b] = function () { r.iyl = r.e; return 8; }
+	// ld iyl,iyh
+	iyocf[0x6c] = function () { r.iyl = r.iyh; return 8; }
+	// ld iyl,iyl
+	iyocf[0x6d] = function () { r.iyl = r.iyl; return 8; }
+
+	// ld iyh,a
+	iyocf[0x67] = function () { r.iyh = r.a; return 8; }
+	// ld iyh,b
+	iyocf[0x60] = function () { r.iyh = r.b; return 8; }
+	// ld iyh,c
+	iyocf[0x61] = function () { r.iyh = r.c; return 8; }
+	// ld iyh,d
+	iyocf[0x62] = function () { r.iyh = r.d; return 8; }
+	// ld iyh,e
+	iyocf[0x63] = function () { r.iyh = r.e; return 8; }
+	// ld iyh,iyh
+	iyocf[0x64] = function () { r.iyh = r.iyh; return 8; }
+	// ld iyh,iyl
+	iyocf[0x65] = function () { r.iyh = r.iyl; return 8; }
+
+	// ld a,ixh
+	iyocf[0x7c] = function () { r.a = r.iyh; return 8; }
+	// ld a,ixl
+	iyocf[0x7d] = function () { r.a = r.iyl; return 8; }
 
 	// inc iy
 	iyocf[0x23] = function () { set_iy(inc_16bit(get_iy())); return 10; }
@@ -1809,6 +1888,9 @@ function Cpu() {
 
 	// ex (sp),iy
 	iyocf[0xe3] = function () { return executeExchangeSpIy(); }
+
+	// jp (iy)
+	iyocf[0xe9] = function () { r.pc = get_iy(); return 8; }
 
 	////////////////////////////// IX Bit Opcodes //////////////////////////////
 
@@ -1892,7 +1974,6 @@ function Cpu() {
 	ixbocf[0xf6] = function () { let address = (get_ix() + self.xyDisplacement) & 0xffff; let byte = rb(address) | BIT6; wb(address, byte); return 23; }
 	// set 7,(ix+*)
 	ixbocf[0xfe] = function () { let address = (get_ix() + self.xyDisplacement) & 0xffff; let byte = rb(address) | BIT7; wb(address, byte); return 23; }
-
 
 	////////////////////////////// IY Bit Opcodes //////////////////////////////
 
