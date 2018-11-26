@@ -39,11 +39,6 @@ function Sms() {
 		this.joypads.init();
 		this.audio.init();
 
-		///////////////// TEST - DELETE ME /////////////
-		//this.vdp.displayEnabled = true;
-		//this.vdp.displayMode = VDP_DISPLAY_MODE_4;
-		////////////////////////////////////////////////
-
 		this.mainLoop();
 	}
 
@@ -61,15 +56,6 @@ function Sms() {
 			element.msRequestFullscreen();
 		}
 	}
-
-	/*this.loadRom = function (romName) {
-
-		this.util.loadBytesFromUrl('roms/' + romName + '?r=' + Math.round(Math.random() * 10000), function (romBytes) {
-			if (romBytes != null) {
-				self.loadRomFromBytes(romBytes);
-			}
-		});
-	}*/
 
 	this.loadRom = function () {
 
@@ -97,7 +83,6 @@ function Sms() {
 
 		this.isRunning = false;
 		this.mmc.loadRomFromBytes(romBytes);
-		//this.cpu.reset();
 		this.isRunning = true;
 	}
 
@@ -124,9 +109,6 @@ function Sms() {
 			for (let cycle = 0; cycle < SMS_CORE_CLOCK_CYCLES_PER_FRAME; cycle++) {
 
 				if (cycle % 15 == 0) {
-				//if (cycle % 13 == 0) {
-				//if (cycle % 10 == 0) {
-				//if (cycle % 5 == 0) {	
 					this.cpu.tick();
 				}
 
@@ -135,7 +117,6 @@ function Sms() {
 				}
 
 				this.totalCyclesExecuted++;
-				//cyclesThisFrame++;
 			}
 
 			this.vdp.presentFrame();
@@ -155,8 +136,6 @@ function Sms() {
 		}
 
 		document.getElementById('frameDuration').innerHTML = '' + (Math.round(this.averageFrameDuration * 100, 2) / 100) + 'ms (' + this.numberOfFrameRateDrops + ' drops)';
-
-		//this.mmc.dump();
 	}
 
 	this.init();

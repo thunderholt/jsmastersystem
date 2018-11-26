@@ -33,13 +33,7 @@ function Cpu() {
 	this.numberOfCyclesToBurn = 0;
 	this.numberOfCyclesExecutedThisFrame = 0;
 	this.totalNumberOfCyclesExecuted = 0;
-
-	///////
-	//this.isSteppingThrough = false;
-	this.stepThroughCounter = 0;
-	/*this.traceIndex = 1;
-	this.lastTracePc = -1;
-	///////*/
+	this.isSteppingThrough = false;
 
 	////////////////////////////// General Methods //////////////////////////////
 
@@ -138,73 +132,17 @@ function Cpu() {
 
 				let opCode = this.mmc.readByte(this.registers.pc);
 
-				//console.log(opCode.toString(16));
-
-				//if (this.registers.pc == 0x0078) {
-				//if (this.registers.pc == 0x0320) {
-				//if (this.registers.pc == 0x0038) {
-				//if (this.registers.pc == 0x42f9) /* Never gets here */ {
-				//if (this.registers.pc == 0x42a5) {
-				//if (this.registers.pc == 0x4058) /* Write to DC4e */ {
-				//if (this.registers.pc == 0x02a9) /* Write to DC4e - registers are all wrong when we get here */ {
-				/*if (this.registers.pc == 0x1c1b) {
-
-					if (!this.hacked) {
-						wb(0xD299, 0x84);
-						this.hacked = true;
-					}
-				}*/
-
-				//if (this.registers.pc == 0x814f) {
-				//if (this.registers.pc == 0x800F) {
-				//if (this.registers.pc == 0x806B) {
-				//if (this.registers.pc == 0x076E) {	
-				//if (this.registers.pc == 0x0767) {	// 1302
-				/*if (this.registers.pc == 0x810B) {		// 1503
-				//if (this.registers.pc == 0x004B) {	// 1517
-				//if (this.registers.pc == 0x80D3) {
-					
-
-					this.stepThroughCounter = 5;
-				}*/
-
-				/*if (this.registers.pc == 0x0690) {
-					this.stepThroughCounter = 5;
-				}*/
-
-				/*if (this.registers.pc == 0x00DB && this.stepThroughFlag1) {
-					this.isSteppingThrough = true;
-				}*/
-
-				/*if (this.registers.pc == 0x0690) {
-					//console.log('Called Engine_UpdateGameState');
-					this.testCalledThisFrame = true;
-				}
-
-				if (this.registers.pc == 0x09e4) {
-					//console.log('Engine_UpdateLevelState called');
-					this.totalNumberOfCyclesExecuted = 0;
-				}
-
-				if (this.registers.pc == 0x0a12) {
-					console.log('Engine_UpdateLevelState took ' + this.totalNumberOfCyclesExecuted + ' cycles.');
-				}*/
-
 				var opCodeFunction = this.opCodeFunctions[opCode];
 
 				if (opCodeFunction == null) {
 					this.crash('Op-code function not found for 0x' + opCode.toString(16));
 				}
 
-				if (this.stepThroughCounter > 0) {
+				if (this.isSteppingThrough) {
 					console.log(this.registers.pc.toString(16) + ': Op code: ' + opCode.toString(16));
 					this.dump();
 					debugger;
-					//throw "done";
-					this.stepThroughCounter--;
 				}
-
-				//this.trace();
 
 				inc_pc();
 				inc_r();
@@ -220,16 +158,7 @@ function Cpu() {
 
 	this.startFrame = function () {
 
-		/*////////////
-		if (!this.testCalledThisFrame) {
-			console.log('Test not called this frame');
-		}
-
-		this.testCalledThisFrame = false;
-		////////////*/
-
 		if (this.numberOfCyclesExecutedThisFrame > 0 && 
-		//	this.numberOfCyclesExecutedThisFrame != 59660) {
 			this.numberOfCyclesExecutedThisFrame != 59736) {
 			//throw 'Incorrect number of CPU clocks executed last frame.';
 		}
@@ -247,7 +176,6 @@ function Cpu() {
 
 	this.crash = function (reason) {
 
-		//alert(reason);
 		this.dump();
 		throw reason;
 	}
@@ -290,28 +218,6 @@ function Cpu() {
 
 		console.log('CPU: ' + message);
 	}
-
-	/*this.trace = function () {
-
-		if (this.lastTracePc != this.registers.pc) {
-
-			let output = this.traceIndex + ' ';
-			
-			output += this.registers.pc.toString(16) + ': '
-			output += 'AF:' + this.registers.a.toString(16) + this.registers.f.toString(16) + ' ';
-			output += 'BC:' + this.registers.b.toString(16) + this.registers.c.toString(16) + ' ';
-			output += 'DE:' + this.registers.d.toString(16) + this.registers.e.toString(16) + ' ';
-			output += 'HL:' + this.registers.h.toString(16) + this.registers.l.toString(16) + ' ';
-			output += 'IX:' + get_ix().toString(16) + ' ';
-			output += 'IY:' + get_iy().toString(16) + ' ';
-			output += 'SP:' + this.registers.sp.toString(16) + ' ';;
-			
-			console.log(output.toUpperCase());
-
-			this.traceIndex++;
-			this.lastTracePc = this.registers.pc;
-		}
-	}*/
 
 	this.dump = function () {
 
