@@ -37,7 +37,6 @@ function Sms() {
 
 		this.vdp.init();
 		this.joypads.init();
-		this.audio.init();
 
 		this.mainLoop();
 	}

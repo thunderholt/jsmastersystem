@@ -6,34 +6,32 @@ function Audio() {
 	this.latchedChannelIndex = 0;
 	this.latchType = AUDIO_LATCHTYPE_TONENOISE;
 
-	this.init = function () {
-
-		this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-		for (let i = 0; i < 3; i++) {
-
-			let toneChannel = {
-				volume: 1,
-				tone: 0,
-				gainNode: this.audioContext.createGain(),
-				oscillatorNode: this.audioContext.createOscillator()
-			}
-
-			toneChannel.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-			toneChannel.gainNode.connect(this.audioContext.destination);
-
-			toneChannel.oscillatorNode.type = 'square';
-			toneChannel.oscillatorNode.frequency.setValueAtTime(0, this.audioContext.currentTime);
-			toneChannel.oscillatorNode.connect(toneChannel.gainNode);
-			toneChannel.oscillatorNode.start();
-
-			this.toneChannels.push(toneChannel);
-		}
-
-		this.reset();
-	}
-
 	this.reset = function () {
+
+		if (this.audioContext == null) {
+
+			this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+			for (let i = 0; i < 3; i++) {
+
+				let toneChannel = {
+					volume: 1,
+					tone: 0,
+					gainNode: this.audioContext.createGain(),
+					oscillatorNode: this.audioContext.createOscillator()
+				}
+
+				toneChannel.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+				toneChannel.gainNode.connect(this.audioContext.destination);
+
+				toneChannel.oscillatorNode.type = 'square';
+				toneChannel.oscillatorNode.frequency.setValueAtTime(0, this.audioContext.currentTime);
+				toneChannel.oscillatorNode.connect(toneChannel.gainNode);
+				toneChannel.oscillatorNode.start();
+
+				this.toneChannels.push(toneChannel);
+			}
+		}
 
 		for (let i = 0; i < 3; i++) {
 
@@ -43,6 +41,8 @@ function Audio() {
 			toneChannel.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
 			toneChannel.oscillatorNode.frequency.setValueAtTime(0, this.audioContext.currentTime);
 		}
+
+		this.audioContext.resume();
 	}
 
 	this.writeByteToPort = function (byte) {
