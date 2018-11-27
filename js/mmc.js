@@ -49,10 +49,15 @@ function Mmc() {
 	this.loadRomFromBytes = function (romBytes) {
 
 		let byteArray = new Uint8Array(romBytes);    
+
+		// Some ROM dumping programs put a wierd 512 byte header at the beginning
+		// of the ROM. If this is detected, it needs to be stripped out.
+		let stripHeader = byteArray.length % 0x4000 == 512;
+
     	let bankIndex = 0;
     	let bankByteIndex = 0;
 
-    	for (let i = 0; i < byteArray.byteLength; i++) {
+    	for (let i = stripHeader ? 512 : 0; i < byteArray.byteLength; i++) {
       		this.romBanks[bankIndex][bankByteIndex] = byteArray[i];
       		bankByteIndex++;
       		if (bankByteIndex == MMC_ROM_BANK_SIZE) {
