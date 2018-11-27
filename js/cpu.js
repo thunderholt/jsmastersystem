@@ -1471,10 +1471,20 @@ function Cpu() {
 	// im 1
 	eocf[0x76] = function () { self.interruptMode = 1; return 8; }
 
+	// ini
+	eocf[0xa2] = function () { return executeInIncrement(); }
+	// inir
+	eocf[0xb2] = function () { return executeInIncrementRepeat(); }
+
 	// outi
 	eocf[0xa3] = function () { return executeOutIncrement(); }
 	// otir
 	eocf[0xb3] = function () { return executeOutIncrementRepeat(); }
+
+	// ind
+	eocf[0xaa] = function () { return executeInDecrement(); }
+	// indr
+	eocf[0xba] = function () { return executeInDecrementRepeat(); }
 
 	// outd
 	eocf[0xab] = function () { return executeOutDecrement(); }
@@ -3584,6 +3594,74 @@ function Cpu() {
 		// S: Preserved.
 
 		if (bc > 0) {
+			dec2_pc();
+			return 21;
+		} else {
+			return 16;
+		}
+	}
+
+	function executeInIncrement() {
+
+		let hl = get_hl();
+
+		let byte = self.ioc.readByte(r.c);
+		wb(hl, byte);
+
+		set_hl(inc_16bit(hl));
+
+		r.b = dec_8bit(r.b);
+
+		return 16;
+	}
+
+	function executeInIncrementRepeat() {
+
+		inc2_r();
+
+		let hl = get_hl();
+
+		let byte = self.ioc.readByte(r.c);
+		wb(hl, byte);
+
+		set_hl(inc_16bit(hl));
+
+		r.b = dec_8bit(r.b);
+
+		if (r.b > 0) {
+			dec2_pc();
+			return 21;
+		} else {
+			return 16;
+		}
+	}
+
+	function executeInDecrement() {
+
+		let hl = get_hl();
+
+		let byte = self.ioc.readByte(r.c);
+		wb(hl, byte);
+
+		set_hl(dec_16bit(hl));
+
+		r.b = dec_8bit(r.b);
+
+		return 16;
+	}
+
+	function executeInDecrementRepeat() {
+
+		let hl = get_hl();
+
+		let byte = self.ioc.readByte(r.c);
+		wb(hl, byte);
+
+		set_hl(dec_16bit(hl));
+
+		r.b = dec_8bit(r.b);
+
+		if (r.b > 0) {
 			dec2_pc();
 			return 21;
 		} else {
