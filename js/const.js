@@ -89,21 +89,27 @@ const VDP_DATA_PORT_WRITE_MODE_CRAM = 2;
 
 ////////////////////////////// Joypads Constants //////////////////////////////
 
-const JOYPADS_A_UP = 0x01;
-const JOYPADS_A_DOWN = 0x02;
-const JOYPADS_A_LEFT = 0x04;
-const JOYPADS_A_RIGHT = 0x08;
-const JOYPADS_A_TRIGGER_LEFT = 0x10;
-const JOYPADS_A_TRIGGER_RIGHT = 0x20;
-const JOYPADS_B_UP = 0x40;
-const JOYPADS_B_DOWN = 0x80;
-const JOYPADS_B_LEFT = 0x01;
-const JOYPADS_B_RIGHT = 0x02;
-const JOYPADS_B_TRIGGER_LEFT = 0x40;
-const JOYPADS_B_TRIGGER_RIGHT = 0x80;
+const INPUT_PORT_AB = 0;
+const INPUT_PORT_BMISC = 1;
 
-const KEYSTATE_UP = 0;
-const KEYSTATE_DOWN = 1;
+const INPUT_BUTTON_COUNT = 6;
+
+const INPUT_JOYPAD_BUTTON_UP = 0;
+const INPUT_JOYPAD_BUTTON_DOWN = 1;
+const INPUT_JOYPAD_BUTTON_LEFT = 2;
+const INPUT_JOYPAD_BUTTON_RIGHT = 3;
+const INPUT_JOYPAD_BUTTON_TRIGGER_LEFT = 4;
+const INPUT_JOYPAD_BUTTON_TRIGGER_RIGHT = 5;
+
+const INPUT_KEYCODE_UP = 38;
+const INPUT_KEYCODE_DOWN = 40;
+const INPUT_KEYCODE_LEFT = 37;
+const INPUT_KEYCODE_RIGHT = 39;
+const INPUT_KEYCODE_Z = 90;
+const INPUT_KEYCODE_X = 88;
+
+const INPUT_KEYSTATE_UP = 0;
+const INPUT_KEYSTATE_DOWN = 1;
 
 ////////////////////////////// Audio Constants //////////////////////////////
 

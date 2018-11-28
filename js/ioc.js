@@ -1,18 +1,11 @@
 function Ioc() {
 	
-	//this.portReaders = [];
-	//this.portWriters = [];
-
 	this.vdp = null;
-	this.joypads = null;
+	this.input = null;
 	this.audio = null;
 
 	this.init = function () {
 
-		/*for (let i = 0; i < 0xff; i++) {
-			this.portReaders[i] = null;
-			this.portWriters[i] = null;
-		}*/
 	}
 
 	this.readByte = function (port) {
@@ -45,11 +38,11 @@ function Ioc() {
 
 			if (port % 2 == 0) {
 
-				byte = this.joypads.readByteFromPortAB();
+				byte = this.input.readByteFromPortAB();
 
 			} else {
 
-				byte = this.joypads.readByteFromPortBMisc();
+				byte = this.input.readByteFromPortBMisc();
 			}
 
 		}
@@ -94,18 +87,7 @@ function Ioc() {
 		} else {
 
 			console.log('Unknown IO port write: ' + port);
-			//throw 'Unknown IO port write: ' + port;
 		}
-
-		/*let portWriter = this.portWriters[port];
-
-		if (portWriter == null) {
-			throw 'Attempt to write byte to unbound port: 0x' + port.toString(16);
-		}
-
-		portWriter(byte);*/
-
-		//console.log('Writing ' + byte.toString(16) + ' to port ' + port.toString(16) + '.');
 	}
 
 	this.setVdp = function (vdp) {
@@ -113,23 +95,15 @@ function Ioc() {
 		this.vdp = vdp;
 	}
 
-	this.setJoypads = function (joypads) {
+	this.setInput = function (input) {
 
-		this.joypads = joypads;
+		this.input = input;
 	}
 
 	this.setAudio = function (audio) {
 
 		this.audio = audio;
 	}
-
-	/*this.bindPort = function (portNumber, name, reader, writer) {
-
-		this.portReaders[portNumber] = reader;
-		this.portWriters[portNumber] = writer;
-
-		this.log('Bound port 0x' + portNumber.toString(16) + ': ' + name + '.');
-	}*/
 
 	this.log = function (message) {
 

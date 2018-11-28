@@ -6,7 +6,7 @@ function Sms() {
 	this.mmc = new Mmc();
 	this.ioc = new Ioc();
 	this.vdp = new Vdp();
-	this.joypads = new Joypads();
+	this.input = new Input();
 	this.audio = new Audio();
 	this.util = new Util();
 
@@ -16,7 +16,6 @@ function Sms() {
 	this.averageFrameDuration = 0;
 	this.totalFrameDuration = 0;
 	this.numberOfFrameRateDrops = 0;
-	//this.cpuCycleBurn = 0;
 	this.canvas = null;
 	this.canvasContext = null;
 
@@ -32,11 +31,11 @@ function Sms() {
 		this.vdp.setCpu(this.cpu);
 
 		this.ioc.setVdp(this.vdp);
-		this.ioc.setJoypads(this.joypads);
+		this.ioc.setInput(this.input);
 		this.ioc.setAudio(this.audio);
 
 		this.vdp.init();
-		this.joypads.init();
+		this.input.init();
 
 		this.mainLoop();
 	}
@@ -63,7 +62,7 @@ function Sms() {
 		this.vdp.reset();
 		this.mmc.reset();
 		this.audio.reset();
-		this.joypads.reset();
+		this.input.reset();
 
 		var romFileInput = document.getElementById('romFileInput');
 
@@ -98,7 +97,7 @@ function Sms() {
 
 		let startFrameTime = performance.now();
 
-		this.joypads.update();
+		this.input.update();
 
 		for (let i = 0; i < 1; i++) {
 
