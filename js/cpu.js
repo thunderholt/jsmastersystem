@@ -1697,6 +1697,22 @@ function Cpu() {
 	ixocf[0x7c] = function () { r.a = r.ixh; return 8; }
 	// ld a,ixl
 	ixocf[0x7d] = function () { r.a = r.ixl; return 8; }
+	// ld b,ixh
+	ixocf[0x44] = function () { r.b = r.ixh; return 8; }
+	// ld b,ixl
+	ixocf[0x45] = function () { r.b = r.ixl; return 8; }
+	// ld c,ixh
+	ixocf[0x4c] = function () { r.c = r.ixh; return 8; }
+	// ld c,ixl
+	ixocf[0x4d] = function () { r.c = r.ixl; return 8; }
+	// ld d,ixh
+	ixocf[0x54] = function () { r.d = r.ixh; return 8; }
+	// ld d,ixl
+	ixocf[0x55] = function () { r.d = r.ixl; return 8; }
+	// ld e,ixh
+	ixocf[0x5c] = function () { r.e = r.ixh; return 8; }
+	// ld e,ixl
+	ixocf[0x5d] = function () { r.e = r.ixl; return 8; }
 
 	// inc ix
 	ixocf[0x23] = function () { set_ix(inc_16bit(get_ix())); return 10; }
@@ -1735,12 +1751,31 @@ function Cpu() {
 	// add ix,sp
 	ixocf[0x39] = function () { set_ix(add_16bit(get_ix(), r.sp)); return 15; }
 
+	// add a,ixh
+	ixocf[0x84] = function () { r.a = add_8bit(r.a, r.ixh); return 8; }
+	// add a,ixl
+	ixocf[0x85] = function () { r.a = add_8bit(r.a, r.ixl); return 8; }
 	// add a,(ix+*)
 	ixocf[0x86] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_ix() + disp) & 0xffff; let byte = rb(address); r.a = add_8bit(r.a, byte); return 19; }
+	
+	// sub ixh
+	ixocf[0x94] = function () { r.a = sub_8bit(r.a, r.ixh); return 8; }
+	// sub ixl
+	ixocf[0x95] = function () { r.a = sub_8bit(r.a, r.ixl); return 8; }
 	// sub (ix+*)
 	ixocf[0x96] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_ix() + disp) & 0xffff; let byte = rb(address); r.a = sub_8bit(r.a, byte); return 19; }
+	
+	// and ixh
+	ixocf[0xa4] = function () { r.a = and_8bit(r.a, r.ixh); return 8; }
+	// and ixl
+	ixocf[0xa5] = function () { r.a = and_8bit(r.a, r.ixl); return 8; }
 	// and (ix+*)
 	ixocf[0xa6] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_ix() + disp) & 0xffff; let byte = rb(address); r.a = and_8bit(r.a, byte); return 19; }
+	
+	// or ixh
+	ixocf[0xb4] = function () { r.a = or_8bit(r.a, r.ixh); return 8; }
+	// or ixl
+	ixocf[0xb5] = function () { r.a = or_8bit(r.a, r.ixl); return 8; }
 	// or (ix+*)
 	ixocf[0xb6] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_ix() + disp) & 0xffff; let byte = rb(address); r.a = or_8bit(r.a, byte); return 19; }
 
@@ -1750,6 +1785,11 @@ function Cpu() {
 	ixocf[0x9e] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_ix() + disp) & 0xffff; let byte = rb(address); r.a = sbc_8bit(r.a, byte); return 19; }
 	// xor (ix+*)
 	ixocf[0xae] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_ix() + disp) & 0xffff; let byte = rb(address); r.a = xor_8bit(r.a, byte); return 19; }
+	
+	// cp ixh
+	ixocf[0xbc] = function () { sub_8bit(r.a, r.ixh); return 8; }
+	// cp ixl
+	ixocf[0xbd] = function () { sub_8bit(r.a, r.ixl); return 8; }
 	// cp (ix+*)
 	ixocf[0xbe] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_ix() + disp) & 0xffff; let byte = rb(address); sub_8bit(r.a, byte); return 19; }
 
@@ -1836,10 +1876,26 @@ function Cpu() {
 	// ld iyh,iyl
 	iyocf[0x65] = function () { r.iyh = r.iyl; return 8; }
 
-	// ld a,ixh
+	// ld a,iyh
 	iyocf[0x7c] = function () { r.a = r.iyh; return 8; }
-	// ld a,ixl
+	// ld a,iyl
 	iyocf[0x7d] = function () { r.a = r.iyl; return 8; }
+	// ld b,iyh
+	iyocf[0x44] = function () { r.b = r.iyh; return 8; }
+	// ld b,iyl
+	iyocf[0x45] = function () { r.b = r.iyl; return 8; }
+	// ld c,iyh
+	iyocf[0x4c] = function () { r.c = r.iyh; return 8; }
+	// ld c,iyl
+	iyocf[0x4d] = function () { r.c = r.iyl; return 8; }
+	// ld d,iyh
+	iyocf[0x54] = function () { r.d = r.iyh; return 8; }
+	// ld d,iyl
+	iyocf[0x55] = function () { r.d = r.iyl; return 8; }
+	// ld e,iyh
+	iyocf[0x5c] = function () { r.e = r.iyh; return 8; }
+	// ld e,iyl
+	iyocf[0x5d] = function () { r.e = r.iyl; return 8; }
 
 	// inc iy
 	iyocf[0x23] = function () { set_iy(inc_16bit(get_iy())); return 10; }
@@ -1878,12 +1934,31 @@ function Cpu() {
 	// add iy,sp
 	iyocf[0x39] = function () { set_iy(add_16bit(get_iy(), r.sp)); return 15; }
 
+	// add a,iyh
+	iyocf[0x84] = function () { r.a = add_8bit(r.a, r.iyh); return 8; }
+	// add a,iyl
+	iyocf[0x85] = function () { r.a = add_8bit(r.a, r.iyl); return 8; }
 	// add a,(iy+*)
 	iyocf[0x86] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_iy() + disp) & 0xffff; let byte = rb(address); r.a = add_8bit(r.a, byte); return 19; }
+	
+	// sub iyh
+	iyocf[0x94] = function () { r.a = sub_8bit(r.a, r.iyh); return 8; }
+	// sub iyl
+	iyocf[0x95] = function () { r.a = sub_8bit(r.a, r.iyl); return 8; }
 	// sub (iy+*)
 	iyocf[0x96] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_iy() + disp) & 0xffff; let byte = rb(address); r.a = sub_8bit(r.a, byte); return 19; }
+	
+	// and iyh
+	iyocf[0xa4] = function () { r.a = and_8bit(r.a, r.iyh); return 8; }
+	// and iyl
+	iyocf[0xa5] = function () { r.a = and_8bit(r.a, r.iyl); return 8; }
 	// and (iy+*)
 	iyocf[0xa6] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_iy() + disp) & 0xffff; let byte = rb(address); r.a = and_8bit(r.a, byte); return 19; }
+	
+	// or iyh
+	iyocf[0xb4] = function () { r.a = or_8bit(r.a, r.iyh); return 8; }
+	// or iyl
+	iyocf[0xb5] = function () { r.a = or_8bit(r.a, r.iyl); return 8; }
 	// or (iy+*)
 	iyocf[0xb6] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_iy() + disp) & 0xffff; let byte = rb(address); r.a = or_8bit(r.a, byte); return 19; }
 
@@ -1893,6 +1968,11 @@ function Cpu() {
 	iyocf[0x9e] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_iy() + disp) & 0xffff; let byte = rb(address); r.a = sbc_8bit(r.a, byte); return 19; }
 	// xor (iy+*)
 	iyocf[0xae] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_iy() + disp) & 0xffff; let byte = rb(address); r.a = xor_8bit(r.a, byte); return 19; }
+	
+	// cp ixh
+	iyocf[0xbc] = function () { sub_8bit(r.a, r.iyh); return 8; }
+	// cp ixl
+	iyocf[0xbd] = function () { sub_8bit(r.a, r.iyl); return 8; }
 	// cp (iy+*)
 	iyocf[0xbe] = function () { let disp = convertByteToSigned(rb(r.pc)); inc_pc(); let address = (get_iy() + disp) & 0xffff; let byte = rb(address); sub_8bit(r.a, byte); return 19; }
 
