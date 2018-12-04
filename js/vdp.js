@@ -2,18 +2,10 @@ function Vdp() {
 	
 	var self = this;
 
-	//this.frameIsComplete = false;
-	//this.clockCounter = 0;
-	//this.ioc = null;
 	this.cpu = null;
 	this.canvasContext = null;
 	this.frameBuffer = null;
 	this.frameBufferSize = { width: 0, height: 0 };
-	//this.expectedFrameBufferSize = { width: 0, height: 0 };
-	//this.actualFrameBufferSize = { width: 0, height: 0 };
-	//this.displayEnabled = false;
-	//this.displayMode = VDP_DISPLAY_MODE_UNKNOWN;
-	//this.lineMode = VDP_LINE_MODE_192;
 
 	this.registers = {
 		nameTableBaseAddress: 0,
@@ -27,29 +19,19 @@ function Vdp() {
 
 	this.vram = new Uint8Array(VDP_VRAM_RAM_SIZE);
 	this.cram = new Uint8Array(VDP_CRAM_RAM_SIZE);
-	//this.registers = [];
+
 	this.currentScanlineIndex = 0;
 	this.currentScanlinePixelIndex = 0;
 	this.numberOfCyclesToBurn = 0;
-	//this.dataPortValue = 0;
-	//this.controlPortValue = 0;
 	this.controlWord = 0;
 	this.controlWordFlag = false;
-	//this.lineInterruptPendingFlag = false;
-	//this.nameTableBaseAddress = 0;
-	//this.spriteAttributeTableBaseAddress = 0;
-	//this.spritePatternGeneratorBaseAddress = 0;
-	//this.overscanColour = 0;
-	//this.backgroundXScroll = 0;
-	//this.backgroundYScroll = 0;
-	//this.lineCounter = 0;
+	this.lineCounter = 0;
 	this.dataPortWriteMode = VDP_DATA_PORT_WRITE_MODE_VRAM;
 	this.dataPortReadWriteAddress = 0;
 	this.vCounter = 0;
 	this.numberOfCyclesExecutedThisFrame = 0;
 	this.statusFlags = 0;
 	this.readBufferByte = 0;
-	//this.pixel = { r: 0, g: 0, b: 0 }
 
 	this.modeSettings = {
 		disableVerticalScrollingForColumns24To31: false,
@@ -66,17 +48,6 @@ function Vdp() {
 		spritePixelsAreDoubleSize: false
 	}
 
-	//this.currentBackgroundPixelColour = 0;
-	/*this.currentTileData = {
-		palletteNumber: 0,
-		horizontalFlip: false,
-		verticalFlip: false,
-
-		tileDataPlane0Byte: 0,
-		tileDataPlane1Byte: 0,
-		tileDataPlane2Byte: 0,
-		tileDataPlane3Byte: 0
-	}*/
 	this.tileScanLineData = {
 		scanLineX: 0,
 		counter: 0,
@@ -98,23 +69,14 @@ function Vdp() {
 
 		numberOfActiveSprites: 0,
 		sprites: []
-		//tilePixelCounter: 0
 	}
 
 	this.init = function () {
-
-		//this.frameBuffer = system.canvasContext.createImageData(
-		//	VDP_FRAMEBUFFER_WIDTH_PIXELS * 3, VDP_FRAMEBUFFER_HEIGHT_PIXELS * 3);
-
-		/*for (let i = 0; i < 10; i++) {
-			this.registers[i] = 0;
-		}*/
 
 		for (let i = 0; i < 8; i++) {
 			this.tileScanLineData.sprites[i] = {
 				x: 0,
 				tileIndex: 0,
-				//tilePixelRow: 0,
 				tilePlane0Byte: 0,
 				tilePlane1Byte: 0,
 				tilePlane2Byte: 0,
@@ -258,12 +220,6 @@ function Vdp() {
 
 			if (raiseInterrupt) {
 
-				/*/////
-				if (!this.cpu.isHalted) {
-					//throw "Ahhh";
-				}
-				/////*/
-
 				this.cpu.raiseMaskableInterrupt();
 			}
 
@@ -277,18 +233,11 @@ function Vdp() {
 
 	this.startFrame = function () {
 
-		//this.frameIsComplete = false;
-		//this.clockCounter = 0;
-
-		//if (this.currentScanlineIndex >= 262) {
 		if (this.currentScanlineIndex > 0 && this.currentScanlineIndex != 262) {
 			throw 'Wrong number of scanlines, bad VDP timing!';
 		}
 
-		//console.log('Num VDP clocks last frame: ' + this.numberOfClocksExecutedThisFrame);
-
 		if (this.numberOfCyclesExecutedThisFrame > 0 && 
-		//	this.numberOfCyclesExecutedThisFrame != 178978) {
 			this.numberOfCyclesExecutedThisFrame != 179208) {
 			throw 'Incorrect number of VDP clocks executed last frame.';
 		}
@@ -332,10 +281,6 @@ function Vdp() {
 
 		this.controlWordFlag = false;
 
-		//return this.dataPortValue;
-
-		//throw 'Unimp: read data port.'
-
 		let byte = this.readBufferByte;
 
 		this.readBufferByte = this.vram[this.dataPortReadWriteAddress];
@@ -347,8 +292,6 @@ function Vdp() {
 	}
 
 	this.writeByteToDataPort = function (byte) {
-
-		//console.log('Data port write: ' + byte.toString(16) + ' @ ' + this.dataPortReadWriteAddress.toString(16));
 
 		this.controlWordFlag = false;
 
@@ -394,10 +337,6 @@ function Vdp() {
 
 	this.writeByteToControlPort = function (byte) {
 
-		//console.log('Control port write: ' + byte.toString(16));
-
-		//this.controlPortValue = byte;
-
 		if (!this.controlWordFlag) {
 
 			this.controlWord = byte;
@@ -413,7 +352,6 @@ function Vdp() {
 
 			if (controlCode == VDP_CONTROL_CODE_READWRITE_VRAM) {
 
-				//throw 'Unimp: VDP_CONTROL_CODE_READWRITE_VRAM';
 				this.dataPortWriteMode = VDP_DATA_PORT_WRITE_MODE_VRAM;
 
 				this.readBufferByte = this.vram[this.dataPortReadWriteAddress];
@@ -424,7 +362,6 @@ function Vdp() {
 			} else if (controlCode == VDP_CONTROL_CODE_ENABLE_DATA_PORT_VRAM_WRITES) {
 
 				this.dataPortWriteMode = VDP_DATA_PORT_WRITE_MODE_VRAM;
-				//console.log('Data port writes now go to VRAM at: ' + this.dataPortReadWriteAddress.toString(16));
 
 			} else if (controlCode == VDP_CONTROL_CODE_WRITE_REGISTER) {
 
@@ -436,16 +373,11 @@ function Vdp() {
 			} else if (controlCode == VDP_CONTROL_CODE_ENABLE_DATA_PORT_CRAM_WRITES) {
 
 				this.dataPortWriteMode = VDP_DATA_PORT_WRITE_MODE_CRAM;
-				//console.log('Data port writes now go to CRAM at: ' + (this.dataPortReadWriteAddress & 0x1f).toString(16));
 			}
 		}
 	}
 
 	this.writeByteToRegister = function (registerIndex, byte) {
-
-		//console.log('Writing ' + byte.toString(16) +' to register ' + registerIndex + '.');
-
-		//this.registers[registerIndex] = byte;
 
 		if (registerIndex == VDP_REGISTER_INDEX_MODE_CONTROL_1) {
 
@@ -549,17 +481,9 @@ function Vdp() {
 		// Gather the active sprites for the scanline.
 		d.numberOfActiveSprites = 0;
 
-		/*if (this.modeSettings.disableHorizontalScrollingForRows0To1) {
-			throw 'Not implemented: disable horizontal scrolling for rows 0 to 1.';
-		}*/
-
 		if (this.modeSettings.shiftSpritesLeftBy8Pixels) {
 			throw 'Not implemented: shift sprites left by 8 pixels.';
 		}
-
-		/*if (this.modeSettings.useLargeSprites) {
-			throw 'Not implemented: use large sprites.';
-		}*/
 
 		if (this.modeSettings.spritePixelsAreDoubleSize) {
 			throw 'Not implemented: sprite pixels are double size.'
