@@ -4,8 +4,10 @@ function Vdp() {
 
 	this.cpu = null;
 	this.canvasContext = null;
+	this.frameBufferImageData = null;
 	this.frameBuffer = null;
 	this.frameBufferSize = { width: 0, height: 0 };
+	this.colourLookup = [];
 
 	this.registers = {
 		nameTableBaseAddress: 0,
@@ -73,6 +75,15 @@ function Vdp() {
 
 	this.init = function () {
 
+		this.initTileScanLineData();
+
+		this.initColourLookup();
+
+		this.reset();
+	}
+
+	this.initTileScanLineData = function () {
+
 		for (let i = 0; i < 8; i++) {
 			this.tileScanLineData.sprites[i] = {
 				x: 0,
@@ -83,8 +94,18 @@ function Vdp() {
 				tilePlane3Byte: 0
 			}
 		}
+	}
 
-		this.reset();
+	this.initColourLookup = function () {
+
+		for (let colour = 0; colour <= 255; colour++) {
+			let r = (colour & 0x03) * 85;
+			let g = ((colour & 0x0c) >> 2) * 85;
+			let b = ((colour & 0x30) >> 4) * 85;
+			let a = 255;
+
+			this.colourLookup[colour] = (a << 24) | (b << 16) | (g << 8) | r;
+		}
 	}
 
 	this.reset = function () {
@@ -252,7 +273,7 @@ function Vdp() {
 
 	this.presentFrame = function () {
 
-		this.canvasContext.putImageData(this.frameBuffer, 0, 0);
+		this.canvasContext.putImageData(this.frameBufferImageData, 0, 0);
 	}
 
 	this.setCanvasContext = function (canvasContext) {
@@ -262,9 +283,11 @@ function Vdp() {
 		this.frameBufferSize.width = 256; // FIXME - constant
 		this.frameBufferSize.height = 192; // FIXME - constant
 
-		this.frameBuffer = this.canvasContext.createImageData(
+		this.frameBufferImageData = this.canvasContext.createImageData(
 			this.frameBufferSize.width, 
 			this.frameBufferSize.height); 
+
+		this.frameBuffer = new Uint32Array(this.frameBufferImageData.data.buffer);
 	}
 
 	this.setCpu = function (cpu) {
@@ -442,7 +465,8 @@ function Vdp() {
 	this.generateScanLine = function () {
 
 		let frameBufferData = this.frameBuffer.data;
-		let frameBufferBaseOffset = this.currentScanlineIndex * this.frameBufferSize.width * 4;
+		//let frameBufferBaseOffset = this.currentScanlineIndex * this.frameBufferSize.width * 4;
+		let frameBufferIndex = this.currentScanlineIndex * this.frameBufferSize.width;
 
 		this.resetTileScanLineData()
 
@@ -450,12 +474,15 @@ function Vdp() {
 
 			let colour = this.readNextScanLineColour();
 
-			let frameBufferIndex = frameBufferBaseOffset + x * 4;
+			this.frameBuffer[frameBufferIndex] = this.colourLookup[colour];
+			frameBufferIndex++;
+
+			/*let frameBufferIndex = frameBufferBaseOffset + x * 4;
 
 			frameBufferData[frameBufferIndex] = (colour & 0x03) * 85;
 			frameBufferData[++frameBufferIndex] = ((colour & 0x0c) >> 2) * 85;
 			frameBufferData[++frameBufferIndex] = ((colour & 0x30) >> 4) * 85;
-			frameBufferData[++frameBufferIndex] = 255;
+			frameBufferData[++frameBufferIndex] = 255;*/
 		}
 	}
 
