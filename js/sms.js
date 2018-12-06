@@ -11,7 +11,7 @@ function Sms() {
 	this.util = new Util();
 
 	this.isRunning = false;
-	this.totalCyclesExecuted = 0;
+	//this.totalCyclesExecuted = 0;
 	this.totalFramesRendered = 0;
 	this.averageFrameDuration = 0;
 	this.totalFrameDuration = 0;
@@ -99,27 +99,29 @@ function Sms() {
 
 		this.input.update();
 
-		for (let i = 0; i < 1; i++) {
+		this.cpu.startFrame();
+		this.vdp.startFrame();
 
-			this.cpu.startFrame();
-			this.vdp.startFrame();
+		for (let i = 0; i < SMS_CORE_CLOCK_CYCLES_PER_FRAME / 5; i++) {
 
-			for (let cycle = 0; cycle < SMS_CORE_CLOCK_CYCLES_PER_FRAME; cycle++) {
-
-				if (cycle % 15 == 0) {
-					this.cpu.tick();
-				}
-
-				if (cycle % 5 == 0) {
-					this.vdp.tick();
-				}
-
-				this.totalCyclesExecuted++;
+			if (i % 3 == 0) {
+				this.cpu.tick();
 			}
 
-			this.vdp.presentFrame();
+			this.vdp.tick();
+
+			/*if (i % 15 == 0) {
+				this.cpu.tick();
+			}
+
+			if (i % 5 == 0) {
+				this.vdp.tick();
+			}*/
+
+			//this.totalCyclesExecuted++;
 		}
 
+		this.vdp.presentFrame();
 		this.audio.update();
 
 		let endFrameTime = performance.now();
