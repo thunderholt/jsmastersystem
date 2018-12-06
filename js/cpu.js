@@ -130,17 +130,6 @@ function Cpu() {
 
 			} else {
 
-				//////////////
-				/*if (this.registers.pc == 0x0c4b) {
-					//this.debugFlag1 = true;
-					this.isSteppingThrough = true;
-				}
-
-				if (this.debugFlag1 && this.registers.pc == 0x0c47) {
-					this.isSteppingThrough = true;
-				}*/
-				//////////////
-
 				let opCode = this.mmc.readByte(this.registers.pc);
 
 				var opCodeFunction = this.opCodeFunctions[opCode];
