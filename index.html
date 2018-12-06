@@ -88,19 +88,93 @@
 			padding: 4px;
 		}
 
-		/*#tool-bar .left {
-			display: inline-block;
-			width: 49%;
-		}
-
-		#tool-bar .right {
-			display: inline-block;
-			width: 49%;
-			text-align: right;
-		}*/
-
 		#mem-dump {
 			color: #fff;
+		}
+
+		.onscreen-gamepad {
+			position: absolute;
+			width: 100%;
+			box-sizing: border-box;
+			bottom: 10px;
+			height: 150px;
+		}
+
+		.onscreen-gamepad-dpad {
+			width: 150px;
+			height: 150px;
+			box-sizing: border-box;
+			background-color: rgba(255, 255, 255, 0.5);
+			position: absolute;
+			top: 0px;
+			left: 10px;
+			border-radius: 20px;
+		}
+
+		.onscreen-gamepad-dpad-button {
+			box-sizing: border-box;
+			background-color: pink;
+			width: 33%;
+			height: 33%;
+			position: absolute;
+			background-color: rgba(255, 255, 255, 0.5);
+			border-radius: 10px;
+		}
+
+		.onscreen-gamepad-dpad-button-left {
+			left: 0;
+			top: calc(50% - (33% / 2));
+		}
+
+		.onscreen-gamepad-dpad-button-right {
+			right: 0;
+			top: calc(50% - (33% / 2));
+		}
+
+		.onscreen-gamepad-dpad-button-up {
+			left: calc(50% - (33% / 2));
+			top: 0;
+		}
+
+		.onscreen-gamepad-dpad-button-down {
+			left: calc(50% - (33% / 2));
+			bottom: 0;
+		}
+
+		.onscreen-gamepad-triggers {
+			position: absolute;
+			width: 100px;
+			top: calc(50% - (40px / 2));
+			right: 10px;
+			height: 40px;
+		}
+
+		.onscreen-gamepad-trigger-button {
+			width: 40px;
+			height: 40px;
+			position: absolute;
+			border-radius: 20px;
+			padding-top: 12px;
+			box-sizing: border-box;
+			text-align: center;
+			background-color: rgba(255, 255, 255, 0.5);
+		}
+
+		.onscreen-gamepad-trigger-button-a {
+			left: 0px;
+			top: 0px;
+		}
+
+		.onscreen-gamepad-trigger-button-b {
+			right: 0px;
+			top: 0px;
+		}
+
+		@media (orientation: landscape) {
+			.onscreen-gamepad {
+				top: calc(50% - (150px / 2));
+				bottom: auto;
+			}
 		}
 	</style>
 </head>
@@ -123,17 +197,30 @@
 		<canvas id="sms-canvas" style="image-rendering: pixelated; image-rendering: -moz-crisp-edges;" width="256" height="192"></canvas>
 	</div>
 
+	<div data-role="onscreen-gamepad" class="onscreen-gamepad">
+		<div class="onscreen-gamepad-dpad">
+			<div data-role="onscreen-gamepad-button" data-button-index="2" class="onscreen-gamepad-dpad-button onscreen-gamepad-dpad-button-left"></div>
+			<div data-role="onscreen-gamepad-button" data-button-index="3" class="onscreen-gamepad-dpad-button onscreen-gamepad-dpad-button-right"></div>
+			<div data-role="onscreen-gamepad-button" data-button-index="0" class="onscreen-gamepad-dpad-button onscreen-gamepad-dpad-button-up"></div>
+			<div data-role="onscreen-gamepad-button" data-button-index="1" class="onscreen-gamepad-dpad-button onscreen-gamepad-dpad-button-down"></div>
+		</div>
+		<div class="onscreen-gamepad-triggers">
+			<div data-role="onscreen-gamepad-button" data-button-index="4" class="onscreen-gamepad-trigger-button onscreen-gamepad-trigger-button-a">A</div>
+			<div data-role="onscreen-gamepad-button" data-button-index="5" class="onscreen-gamepad-trigger-button onscreen-gamepad-trigger-button-b">B</div>
+		</div>
+	</div>
+
 	<pre id="mem-dump"></pre>
 
-	<script src="js/sms.js"></script>
-	<script src="js/cpu.js"></script>
-	<script src="js/mmc.js"></script>
-	<script src="js/ioc.js"></script>
-	<script src="js/vdp.js"></script>
-	<script src="js/input.js"></script>
-	<script src="js/audio.js"></script>
-	<script src="js/util.js"></script>
-	<script src="js/const.js"></script>
-	<script src="js/start.js"></script>
+	<script src="js/sms.js?noCache=5"></script>
+	<script src="js/cpu.js?noCache=5"></script>
+	<script src="js/mmc.js?noCache=5"></script>
+	<script src="js/ioc.js?noCache=5"></script>
+	<script src="js/vdp.js?noCache=5"></script>
+	<script src="js/input.js?noCache=5"></script>
+	<script src="js/audio.js?noCache=5"></script>
+	<script src="js/util.js?noCache=5"></script>
+	<script src="js/const.js?noCache=5"></script>
+	<script src="js/start.js?noCache=5"></script>
 </body>
 </html>

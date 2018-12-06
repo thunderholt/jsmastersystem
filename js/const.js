@@ -111,6 +111,9 @@ const INPUT_KEYCODE_X = 88;
 const INPUT_KEYSTATE_UP = 0;
 const INPUT_KEYSTATE_DOWN = 1;
 
+const INPUT_BUTTONSTATE_UP = 0;
+const INPUT_BUTTONSTATE_DOWN = 1;
+
 ////////////////////////////// Audio Constants //////////////////////////////
 
 const AUDIO_LATCHTYPE_TONENOISE = 0;

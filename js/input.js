@@ -5,6 +5,7 @@ function Input() {
 	this.portAB = 0xff;
 	this.portBMisc = 0xff;
 	this.keystates = [];
+	this.onscreenGamepadButtonStates = [];
 	this.joypads = [];
 
 	this.init = function () {
@@ -32,12 +33,21 @@ function Input() {
 				e.gamepad.index, e.gamepad.id, e.gamepad.buttons.length, e.gamepad.axes.length);
 		});
 
-		// Setup joypad 1.
+		this.initJoypad1();
+		this.initJoypad2();
+		this.initOnscreenGamepad();
+		
+		this.reset();
+	}
+
+	this.initJoypad1 = function () {
+
 		let joypad1 = {
 			portBitMappings: {},
 			keyMappings: {},
 			gamepadIndex: -1,
-			gamepadButtonMappings: {}
+			gamepadButtonMappings: {},
+			useOnscreenGamepad: true
 		}
 
 		joypad1.portBitMappings[INPUT_JOYPAD_BUTTON_UP] = { port: INPUT_PORT_AB, bit: BIT0 };
@@ -62,13 +72,16 @@ function Input() {
 		joypad1.gamepadButtonMappings[INPUT_JOYPAD_BUTTON_TRIGGER_RIGHT] = 1;
 
 		this.joypads.push(joypad1);
+	}
 
-		// Setup joypad 2.
+	this.initJoypad2 = function () {
+
 		let joypad2 = {
 			portBitMappings: {},
 			keyMappings: {},
 			gamepadIndex: -1,
-			gamepadButtonMappings: {}
+			gamepadButtonMappings: {},
+			useOnscreenGamepad: false
 		}
 
 		joypad2.portBitMappings[INPUT_JOYPAD_BUTTON_UP] = { port: INPUT_PORT_AB, bit: BIT6 };
@@ -79,8 +92,46 @@ function Input() {
 		joypad2.portBitMappings[INPUT_JOYPAD_BUTTON_TRIGGER_RIGHT] = { port: INPUT_PORT_BMISC, bit: BIT4 };
 
 		this.joypads.push(joypad2);
+	}
 
-		this.reset();
+	this.initOnscreenGamepad = function () {
+
+		for (let i = 0; i < INPUT_BUTTON_COUNT; i++) {
+			this.onscreenGamepadButtonStates[i] = INPUT_KEYSTATE_UP;
+		}
+
+		let onscreenGamepad = document.querySelector('[data-role="onscreen-gamepad"]');
+		let onscreenGamepadButtons = onscreenGamepad.querySelectorAll('[data-role="onscreen-gamepad-button"]');
+
+		for (let i = 0; i < onscreenGamepadButtons.length; i++) {
+			let onscreenGamepadButton = onscreenGamepadButtons[i];
+
+			onscreenGamepadButton.addEventListener('mousedown', function (e) {
+				self.handleOnscreenGamepadButtonEvent(this, INPUT_BUTTONSTATE_DOWN);
+				e.preventDefault();
+			}, false);
+
+			onscreenGamepadButton.addEventListener('mouseup', function (e) {
+				self.handleOnscreenGamepadButtonEvent(this, INPUT_BUTTONSTATE_UP);
+				e.preventDefault();
+			}, false);
+
+			onscreenGamepadButton.addEventListener('touchstart', function (e) {
+				self.handleOnscreenGamepadButtonEvent(this, INPUT_BUTTONSTATE_DOWN);
+				e.preventDefault();
+			}, false);
+
+			onscreenGamepadButton.addEventListener('touchend', function (e) {
+				self.handleOnscreenGamepadButtonEvent(this, INPUT_BUTTONSTATE_UP);
+				e.preventDefault();
+			}, false);
+		}
+	}
+
+	this.handleOnscreenGamepadButtonEvent = function (buttonElement, newButtonState) {
+
+		let buttonIndex = parseInt(buttonElement.getAttribute('data-button-index'));
+		self.onscreenGamepadButtonStates[buttonIndex] = newButtonState;
 	}
 
 	this.reset = function () {
@@ -138,12 +189,17 @@ function Input() {
 					buttonIsDown = true;
 				}
 
-				// See if the joypad button is down.
+				// See if the gamepad button is down.
 				if (joypad.gamepadIndex != -1) {
 					let gamepad = navigator.getGamepads()[joypad.gamepadIndex];
 					if (gamepad != null && gamepad.buttons[gamepadButtonIndex].pressed) {
 						buttonIsDown = true;
 					}
+				}
+
+				// See if the on-screen gamepad button is down.
+				if (joypad.useOnscreenGamepad && self.onscreenGamepadButtonStates[buttonIndex] == INPUT_BUTTONSTATE_DOWN) {
+					buttonIsDown = true;
 				}
 
 				// Toggle the port bit accordingly.
