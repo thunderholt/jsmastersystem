@@ -5,7 +5,7 @@ function Input() {
 	this.portAB = 0xff;
 	this.portBMisc = 0xff;
 	this.keystates = [];
-	this.onscreenGamepadButtonStates = [];
+	this.onscreenGamepadButtons = [];
 	this.joypads = [];
 
 	this.init = function () {
@@ -96,42 +96,79 @@ function Input() {
 
 	this.initOnscreenGamepad = function () {
 
+		// Init the on-screen gamepad buttons.
 		for (let i = 0; i < INPUT_BUTTON_COUNT; i++) {
-			this.onscreenGamepadButtonStates[i] = INPUT_KEYSTATE_UP;
+			this.onscreenGamepadButtons.push({
+				rect: { left: 0, top: 0, right: 0, bottom: 0 },
+				state: INPUT_BUTTONSTATE_UP
+			});
 		}
 
-		let onscreenGamepad = document.querySelector('[data-role="onscreen-gamepad"]');
-		let onscreenGamepadButtons = onscreenGamepad.querySelectorAll('[data-role="onscreen-gamepad-button"]');
+		// Load the on-screen gamepad buttons rects from the DOM, and
+		// make sure we reload the rects if the window is resized or if the
+		// orientation changes.
+		this.reloadOnscreenGamepadButtonRects();
 
-		for (let i = 0; i < onscreenGamepadButtons.length; i++) {
-			let onscreenGamepadButton = onscreenGamepadButtons[i];
+		window.addEventListener('resize', function () {
+			self.reloadOnscreenGamepadButtonRects();			
+		});
 
-			onscreenGamepadButton.addEventListener('mousedown', function (e) {
-				self.handleOnscreenGamepadButtonEvent(this, INPUT_BUTTONSTATE_DOWN);
-				e.preventDefault();
-			}, false);
+		window.addEventListener('orientationchange', function () {
+			self.reloadOnscreenGamepadButtonRects();			
+		});
 
-			onscreenGamepadButton.addEventListener('mouseup', function (e) {
-				self.handleOnscreenGamepadButtonEvent(this, INPUT_BUTTONSTATE_UP);
-				e.preventDefault();
-			}, false);
+		// If a touch event happens, update the on-screen gamepad button states.
+		window.addEventListener('touchstart', function (e) {
+			self.handleOnscreenGamepadTouchEvent(e);
+		}, false);
 
-			onscreenGamepadButton.addEventListener('touchstart', function (e) {
-				self.handleOnscreenGamepadButtonEvent(this, INPUT_BUTTONSTATE_DOWN);
-				e.preventDefault();
-			}, false);
+		window.addEventListener('touchend', function (e) {
+			self.handleOnscreenGamepadTouchEvent(e);
+		}, false);
 
-			onscreenGamepadButton.addEventListener('touchend', function (e) {
-				self.handleOnscreenGamepadButtonEvent(this, INPUT_BUTTONSTATE_UP);
-				e.preventDefault();
-			}, false);
+		window.addEventListener('touchmove', function (e) {
+			self.handleOnscreenGamepadTouchEvent(e);
+		}, false);
+	}
+
+	this.reloadOnscreenGamepadButtonRects = function () {
+
+		let onscreenGamepadElement = document.querySelector('[data-role="onscreen-gamepad"]');
+		let onscreenGamepadButtonElements = onscreenGamepadElement.querySelectorAll('[data-role="onscreen-gamepad-button"]');
+
+		for (let i = 0; i < onscreenGamepadButtonElements.length; i++) {
+			let buttonElement = onscreenGamepadButtonElements[i];
+			let buttonElementRect = buttonElement.getBoundingClientRect();
+			let buttonIndex = parseInt(buttonElement.getAttribute('data-button-index'));
+
+
+			this.onscreenGamepadButtons[buttonIndex].rect.left = buttonElementRect.left;
+			this.onscreenGamepadButtons[buttonIndex].rect.top = buttonElementRect.top;
+			this.onscreenGamepadButtons[buttonIndex].rect.right = buttonElementRect.right;
+			this.onscreenGamepadButtons[buttonIndex].rect.bottom = buttonElementRect.bottom;
 		}
 	}
 
-	this.handleOnscreenGamepadButtonEvent = function (buttonElement, newButtonState) {
+	this.handleOnscreenGamepadTouchEvent = function (e) {
 
-		let buttonIndex = parseInt(buttonElement.getAttribute('data-button-index'));
-		self.onscreenGamepadButtonStates[buttonIndex] = newButtonState;
+		for (let i = 0; i < this.onscreenGamepadButtons.length; i++) {
+			this.onscreenGamepadButtons[i].state = INPUT_BUTTONSTATE_UP;
+		}
+
+		for (let touchIndex = 0; touchIndex < e.touches.length; touchIndex++) {
+			let touch = e.touches[touchIndex];
+
+			for (let i = 0; i < this.onscreenGamepadButtons.length; i++) {
+				let onscreenGamepadButton = this.onscreenGamepadButtons[i]; 
+				if (touch.clientX >= onscreenGamepadButton.rect.left &&
+					touch.clientX <= onscreenGamepadButton.rect.right &&
+					touch.clientY >= onscreenGamepadButton.rect.top &&
+					touch.clientY <= onscreenGamepadButton.rect.bottom) {
+
+					onscreenGamepadButton.state = INPUT_BUTTONSTATE_DOWN;
+				}
+			}
+		}
 	}
 
 	this.reset = function () {
@@ -198,7 +235,7 @@ function Input() {
 				}
 
 				// See if the on-screen gamepad button is down.
-				if (joypad.useOnscreenGamepad && self.onscreenGamepadButtonStates[buttonIndex] == INPUT_BUTTONSTATE_DOWN) {
+				if (joypad.useOnscreenGamepad && self.onscreenGamepadButtons[buttonIndex].state == INPUT_BUTTONSTATE_DOWN) {
 					buttonIsDown = true;
 				}
 

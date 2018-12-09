@@ -1,6 +1,6 @@
 <html>
 <head>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<style>
 		body {
 			margin: 0px;
@@ -97,12 +97,19 @@
 			width: 100%;
 			box-sizing: border-box;
 			bottom: 10px;
-			height: 150px;
+			height: 180px;
+
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
 		}
 
 		.onscreen-gamepad-dpad {
-			width: 150px;
-			height: 150px;
+			width: 180px;
+			height: 180px;
 			box-sizing: border-box;
 			background-color: rgba(255, 255, 255, 0.5);
 			position: absolute;
@@ -118,46 +125,51 @@
 			height: 33%;
 			position: absolute;
 			background-color: rgba(255, 255, 255, 0.5);
-			border-radius: 10px;
 		}
 
 		.onscreen-gamepad-dpad-button-left {
 			left: 0;
 			top: calc(50% - (33% / 2));
+			border-radius: 0px 20px 20px 0px;
 		}
 
 		.onscreen-gamepad-dpad-button-right {
 			right: 0;
 			top: calc(50% - (33% / 2));
+			border-radius: 20px 0px 0px 20px;
 		}
 
 		.onscreen-gamepad-dpad-button-up {
 			left: calc(50% - (33% / 2));
 			top: 0;
+			border-radius: 0px 0px 20px 20px;
 		}
 
 		.onscreen-gamepad-dpad-button-down {
 			left: calc(50% - (33% / 2));
 			bottom: 0;
+			border-radius: 20px 20px 0px 0px;
 		}
 
 		.onscreen-gamepad-triggers {
 			position: absolute;
-			width: 100px;
-			top: calc(50% - (40px / 2));
+			width: 180px;
+			top: calc(50% - (80px / 2));
 			right: 10px;
-			height: 40px;
+			height: 80px;
 		}
 
 		.onscreen-gamepad-trigger-button {
-			width: 40px;
-			height: 40px;
+			width: 80px;
+			height: 80px;
 			position: absolute;
-			border-radius: 20px;
-			padding-top: 12px;
+			border-radius: 40px;
+			padding-top: 21px;
 			box-sizing: border-box;
 			text-align: center;
 			background-color: rgba(255, 255, 255, 0.5);
+			font-size: 30px;
+			color: rgba(255, 255, 255, 0.2);
 		}
 
 		.onscreen-gamepad-trigger-button-a {
@@ -212,15 +224,15 @@
 
 	<pre id="mem-dump"></pre>
 
-	<script src="js/sms.js?noCache=5"></script>
-	<script src="js/cpu.js?noCache=5"></script>
-	<script src="js/mmc.js?noCache=5"></script>
-	<script src="js/ioc.js?noCache=5"></script>
-	<script src="js/vdp.js?noCache=5"></script>
-	<script src="js/input.js?noCache=5"></script>
-	<script src="js/audio.js?noCache=5"></script>
-	<script src="js/util.js?noCache=5"></script>
-	<script src="js/const.js?noCache=5"></script>
-	<script src="js/start.js?noCache=5"></script>
+	<script src="js/sms.js?noCache=8"></script>
+	<script src="js/cpu.js?noCache=8"></script>
+	<script src="js/mmc.js?noCache=8"></script>
+	<script src="js/ioc.js?noCache=8"></script>
+	<script src="js/vdp.js?noCache=8"></script>
+	<script src="js/input.js?noCache=8"></script>
+	<script src="js/audio.js?noCache=8"></script>
+	<script src="js/util.js?noCache=8"></script>
+	<script src="js/const.js?noCache=8"></script>
+	<script src="js/start.js?noCache=8"></script>
 </body>
 </html>
