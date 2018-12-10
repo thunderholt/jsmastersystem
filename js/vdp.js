@@ -23,6 +23,9 @@ function Vdp() {
 	this.cram = new Uint8Array(VDP_CRAM_RAM_SIZE);
 
 	this.currentScanlineIndex = 0;
+	//this.currentScanlinePixelIndex = 0;
+	//this.numberOfCyclesToBurn = 0;
+	//this.numberOfCyclesExecutedThisFrame = 0;
 	this.controlWord = 0;
 	this.controlWordFlag = false;
 	this.lineCounter = 0;
@@ -204,7 +207,7 @@ function Vdp() {
 		// Increment our internal scanline index.
 		this.currentScanlineIndex++;
 		if (this.currentScanlineIndex == 262) {
-			this.currentScanlineIndexlo = 0;
+			this.currentScanlineIndex = 0;
 		}
 	}
 
@@ -402,7 +405,6 @@ function Vdp() {
 	this.generateScanLine = function () {
 
 		let frameBufferData = this.frameBuffer.data;
-		//let frameBufferBaseOffset = this.currentScanlineIndex * this.frameBufferSize.width * 4;
 		let frameBufferIndex = this.currentScanlineIndex * this.frameBufferSize.width;
 
 		this.resetTileScanLineData()
@@ -413,13 +415,6 @@ function Vdp() {
 
 			this.frameBuffer[frameBufferIndex] = this.colourLookup[colour];
 			frameBufferIndex++;
-
-			/*let frameBufferIndex = frameBufferBaseOffset + x * 4;
-
-			frameBufferData[frameBufferIndex] = (colour & 0x03) * 85;
-			frameBufferData[++frameBufferIndex] = ((colour & 0x0c) >> 2) * 85;
-			frameBufferData[++frameBufferIndex] = ((colour & 0x30) >> 4) * 85;
-			frameBufferData[++frameBufferIndex] = 255;*/
 		}
 	}
 
@@ -527,7 +522,7 @@ function Vdp() {
 		let colour = this.cram[basePalletteAddress + colourIndex];
 
 		if (this.modeSettings.maskColumn0WithOverscanColour && d.scanLineX < 8) {
-			colour = 0; // FIXME - use border colour.
+			colour = this.cram[16 + this.registers.overscanColour];
 		}
 
 		d.counter++;
