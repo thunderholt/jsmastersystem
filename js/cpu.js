@@ -30,9 +30,10 @@ function Cpu() {
 	this.interruptMode = 0;
 	this.xyDisplacement = 0;
 	this.isHalted = false;
-	this.numberOfCyclesToBurn = 0;
-	this.numberOfCyclesExecutedThisFrame = 0;
-	this.totalNumberOfCyclesExecuted = 0;
+
+	//this.numberOfCyclesToBurn = 0;
+	//this.numberOfCyclesExecutedThisFrame = 0;
+	//this.totalNumberOfCyclesExecuted = 0;
 	this.isSteppingThrough = false;
 
 	////////////////////////////// General Methods //////////////////////////////
@@ -115,9 +116,9 @@ function Cpu() {
 		this.totalNumberOfCyclesExecuted = 0;
 	}
 
-	this.tick = function () {
+	this.tick = function (numberOfCycles) {
 
-		if (this.numberOfCyclesToBurn == 0) {
+		while (numberOfCycles > 0) {
 
 			if (this.maskableInterruptWaiting) {
 
@@ -126,7 +127,7 @@ function Cpu() {
 
 			if (this.isHalted) {
 
-				this.numberOfCyclesToBurn = 1;
+				break;
 
 			} else {
 
@@ -147,23 +148,9 @@ function Cpu() {
 				inc_pc();
 				inc_r();
 
-				this.numberOfCyclesToBurn = opCodeFunction();
+				numberOfCycles -= opCodeFunction();
 			}
 		}
-
-		this.numberOfCyclesToBurn--;
-		this.numberOfCyclesExecutedThisFrame++;
-		this.totalNumberOfCyclesExecuted++;
-	}
-
-	this.startFrame = function () {
-
-		if (this.numberOfCyclesExecutedThisFrame > 0 && 
-			this.numberOfCyclesExecutedThisFrame != 59736) {
-			//throw 'Incorrect number of CPU clocks executed last frame.';
-		}
-
-		this.numberOfCyclesExecutedThisFrame = 0;
 	}
 
 	this.raiseMaskableInterrupt = function () {

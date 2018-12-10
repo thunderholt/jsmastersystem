@@ -99,26 +99,14 @@ function Sms() {
 
 		this.input.update();
 
-		this.cpu.startFrame();
-		this.vdp.startFrame();
+		let numberOfScanlines = 262; // FIXME - Load 262 from VDP.
+		let numberOfCpuCyclesPerFrame = SMS_CORE_CLOCK_CYCLES_PER_FRAME / 15;
+		let numberOfCpuCyclesPerScanline = numberOfCpuCyclesPerFrame / numberOfScanlines;
 
-		for (let i = 0; i < SMS_CORE_CLOCK_CYCLES_PER_FRAME / 5; i++) {
+		for (let i = 0; i < numberOfScanlines; i++) {
 
-			if (i % 3 == 0) {
-				this.cpu.tick();
-			}
-
-			this.vdp.tick();
-
-			/*if (i % 15 == 0) {
-				this.cpu.tick();
-			}
-
-			if (i % 5 == 0) {
-				this.vdp.tick();
-			}*/
-
-			//this.totalCyclesExecuted++;
+			this.cpu.tick(numberOfCpuCyclesPerScanline);
+			this.vdp.executeScanline();
 		}
 
 		this.vdp.presentFrame();

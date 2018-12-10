@@ -23,15 +23,12 @@ function Vdp() {
 	this.cram = new Uint8Array(VDP_CRAM_RAM_SIZE);
 
 	this.currentScanlineIndex = 0;
-	this.currentScanlinePixelIndex = 0;
-	this.numberOfCyclesToBurn = 0;
 	this.controlWord = 0;
 	this.controlWordFlag = false;
 	this.lineCounter = 0;
 	this.dataPortWriteMode = VDP_DATA_PORT_WRITE_MODE_VRAM;
 	this.dataPortReadWriteAddress = 0;
 	this.vCounter = 0;
-	this.numberOfCyclesExecutedThisFrame = 0;
 	this.statusFlags = 0;
 	this.readBufferByte = 0;
 
@@ -147,128 +144,68 @@ function Vdp() {
 		this.modeSettings.spritePixelsAreDoubleSize = false;
 	}
 
-	this.tick = function () {
+	this.executeScanline = function () {
 
-		if (this.numberOfCyclesToBurn == 0) {
+		let raiseInterrupt = false;
 
-			/////////////////////////
-			if (this.currentScanlinePixelIndex > 341) {
-				throw 'Bad pixel index.';
-			}
-			/////////////////////////
+		// Render the scanline all in one go.
+		if (this.modeSettings.displayEnabled &&
+			this.currentScanlineIndex < VDP_VISIBLE_SCANLINE_COUNT_NTSC) {
 
-			let raiseInterrupt = false;
-
-			// Check if we've just started a new scanline.
-			if (this.currentScanlinePixelIndex == 0) {
-				// FIXME - Is this the correct place on the scanline to increment the V-counter?
-
-				// Increment the v-counter. 
-				// The v-counter jumps back after 0xda, so that its value still fits into a byte at 
-				// the end of the frame.
-				//if (this.vCounter == 0xda) {
-				if (this.currentScanlineIndex == 219) {
-					this.vCounter = 0xd5;
-				} else {
-					this.vCounter++;
-					this.vCounter &= 0xff;
-				}
-			}
-
-			// Move onto the next pixel.
-			this.currentScanlinePixelIndex++;
-
-			// Check if we've reached the visible end of the scanline.
-			if (this.currentScanlinePixelIndex == 256) {
-
-				// FIXME - Is this the correct place on the scanline to raise line counter interrupts?
-
-				// Decrement / reload the line counter.
-				if (this.currentScanlineIndex <= 192) {
-
-					this.lineCounter--;
-					this.lineCounter &= 0xff;
-
-					// Check if the counter has underflowed.
-					if (this.lineCounter == 0xff) {
-						this.lineCounter = this.registers.lineCounter;
-
-						if (this.modeSettings.enableLineInterrupts) {
-							raiseInterrupt = true;
-						}
-					}
-
-				} else {
-
-					this.lineCounter = this.registers.lineCounter;
-				}
-			}
-
-			// Check if we've reached the end of the scanline.
-			if (this.currentScanlinePixelIndex == 342) {
-
-				/////////////////////////
-				if (this.currentScanlineIndex > 261) {
-					throw 'Bad scanline index.';
-				}
-				/////////////////////////
-
-				// End of scanline reached - pixel wrap counter.
-				this.currentScanlinePixelIndex = 0;
-
-				// Render the scanline all in one go.
-				if (this.modeSettings.displayEnabled &&
-					this.currentScanlineIndex < VDP_VISIBLE_SCANLINE_COUNT_NTSC) {
-
-					this.generateScanLine();
-				}
-
-				// FIXME - Is this the correct place on the scanline to raise the frame interrupt?
-
-				// If we've just rendered the last visible scanline, raise the frame interrupt.
-				if (this.currentScanlineIndex == 191) {
-
-					// Set the frame-interrupt-pending status flag.
-					this.statusFlags |= 0x80;
-
-					if (this.modeSettings.frameInterruptEnabled) {
-						raiseInterrupt = true;
-					}
-				}
-
-				this.currentScanlineIndex++;
-			}
-
-			if (raiseInterrupt) {
-
-				this.cpu.raiseMaskableInterrupt();
-			}
-
-			this.numberOfCyclesToBurn = 2;
+			this.generateScanLine();
 		}
 
-		// Burn cycles.
-		this.numberOfCyclesToBurn--;
-		this.numberOfCyclesExecutedThisFrame++;
-	}
-
-	this.startFrame = function () {
-
-		if (this.currentScanlineIndex > 0 && this.currentScanlineIndex != 262) {
-			throw 'Wrong number of scanlines, bad VDP timing!';
+		// Increment the v-counter. 
+		// The v-counter jumps back after 0xda, so that its value still fits into a byte at the end of the frame.
+		if (this.currentScanlineIndex == 219) {
+			this.vCounter = 0xd5;
+		} else {
+			this.vCounter++;
+			this.vCounter &= 0xff;
 		}
 
-		if (this.numberOfCyclesExecutedThisFrame > 0 && 
-			this.numberOfCyclesExecutedThisFrame != 179208) {
-			throw 'Incorrect number of VDP clocks executed last frame.';
+		// Decrement / reload the line counter.
+		if (this.currentScanlineIndex <= 192) {
+
+			this.lineCounter--;
+			this.lineCounter &= 0xff;
+
+			// Check if the counter has underflowed.
+			if (this.lineCounter == 0xff) {
+				this.lineCounter = this.registers.lineCounter;
+
+				if (this.modeSettings.enableLineInterrupts) {
+					raiseInterrupt = true;
+				}
+			}
+
+		} else {
+
+			this.lineCounter = this.registers.lineCounter;
 		}
 
-		//this.checkFrameBuffer();
-		this.currentScanlineIndex = 0;
-		this.currentScanlinePixelIndex = 0;
-		//this.vCounter = 0;
-		this.numberOfCyclesToBurn = 0;
-		this.numberOfCyclesExecutedThisFrame = 0;
+		// See if we need to raise the frame interrupt.
+		if (this.currentScanlineIndex == 193) {
+
+			// Set the frame-interrupt-pending status flag.
+			this.statusFlags |= 0x80;
+
+			if (this.modeSettings.frameInterruptEnabled) {
+				raiseInterrupt = true;
+			}
+		}
+
+		// If we need to raise an interrupt, do it now.
+		if (raiseInterrupt) {
+
+			this.cpu.raiseMaskableInterrupt();
+		}
+
+		// Increment our internal scanline index.
+		this.currentScanlineIndex++;
+		if (this.currentScanlineIndex == 262) {
+			this.currentScanlineIndexlo = 0;
+		}
 	}
 
 	this.presentFrame = function () {
