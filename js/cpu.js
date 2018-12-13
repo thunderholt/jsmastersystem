@@ -219,7 +219,8 @@ function Cpu() {
 		output += 'PC:' + this.registers.pc.toString(16) + ' ';
 		output += 'SP:' + this.registers.sp.toString(16) + ' ';;
 		output += 'R:' + this.registers.r.toString(16) + ' ';
-		output += 'CYC: ' + this.totalNumberOfCyclesExecuted;
+		output += 'CYC: ' + this.totalNumberOfCyclesExecuted + ' ';
+		output += this.maskableInterruptsEnabled ? 'EI' : 'DI';
 
 		console.log(output.toUpperCase());
 	}

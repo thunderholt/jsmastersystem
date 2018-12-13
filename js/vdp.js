@@ -188,15 +188,24 @@ function Vdp() {
 		}
 
 		// See if we need to raise the frame interrupt.
-		if (this.currentScanlineIndex == 193) {
+		// This is a bit odd - the documentation clearly states that the frame
+		// status flag is set on scanline 192, so you'd assume that the interrupt
+		// would be raised at the same time. However, Zool doesn't work unless you
+		// raise the interrupt on the scanline after, which is how MEKA seems to do it.
+		if (this.currentScanlineIndex == 192) {
 
 			// Set the frame-interrupt-pending status flag.
-			this.statusFlags |= 0x80;
+			this.statusFlags |= BIT7;
+		}
+
+		if (this.currentScanlineIndex == 193 && 
+			(this.statusFlags & BIT7) && 
+			this.modeSettings.frameInterruptEnabled) {
 
 			if (this.modeSettings.frameInterruptEnabled) {
 				raiseInterrupt = true;
 			}
-		}
+		}		
 
 		// If we need to raise an interrupt, do it now.
 		if (raiseInterrupt) {
