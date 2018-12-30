@@ -3,6 +3,7 @@ function Vdp() {
 	var self = this;
 
 	this.cpu = null;
+	this.canvas = null;
 	this.canvasContext = null;
 	this.frameBufferImageData = null;
 	this.frameBuffer = null;
@@ -32,6 +33,17 @@ function Vdp() {
 	this.dataPortWriteMode = VDP_DATA_PORT_WRITE_MODE_VRAM;
 	this.dataPortReadWriteAddress = 0;
 	this.vCounter = 0;
+	
+	// Resolution-specific vars.
+	this.vCounterJumpOnScanlineIndex = 219;
+	this.vCounterJumpToIndex = 213;
+	this.interruptAfterScanlineIndex = 192;
+	this.nameTableHeight = 28;
+	this.nameTableBaseAddressMask = 0x0e;
+	this.nameTableBaseAddressOffset = 0;
+	this.visibleScanlineCount = 192;
+	this.stopDrawingSpritesWhenLine208IsFound = true;
+
 	this.statusFlags = 0;
 	this.readBufferByte = 0;
 
@@ -42,10 +54,11 @@ function Vdp() {
 		enableLineInterrupts: false,
 		shiftSpritesLeftBy8Pixels: false,
 		displayMode: VDP_DISPLAY_MODE_UNKNOWN,
+		enableExtendedLineModes: false,
 		displayIsMonochrome: false,
 		displayEnabled: false,
 		frameInterruptEnabled: false,
-		lineMode: VDP_LINE_MODE_192,
+		lineMode: VDP_LINE_MODE_UNKNOWN,
 		useLargeSprites: false,
 		spritePixelsAreDoubleSize: false
 	}
@@ -79,6 +92,12 @@ function Vdp() {
 
 		this.initColourLookup();
 
+		//this.initFrameBuffer();
+
+		window.addEventListener('resize', function () {
+			self.scaleCanvas();			
+		});
+
 		this.reset();
 	}
 
@@ -105,6 +124,76 @@ function Vdp() {
 			let a = 255;
 
 			this.colourLookup[colour] = (a << 24) | (b << 16) | (g << 8) | r;
+		}
+	}
+
+	this.checkFrameBuffer = function () {
+
+		let requiredFrameBufferWidth = 256;
+		let requiredFrameBufferHeight = 192;
+
+		if (this.modeSettings.displayMode == 4 && this.modeSettings.enableExtendedLineModes) {
+			if (this.modeSettings.lineMode == VDP_LINE_MODE_224) {
+				requiredFrameBufferHeight = 224;
+			} else if (this.modeSettings.lineMode == VDP_LINE_MODE_240) {
+				requiredFrameBufferHeight = 240;
+			}
+		}
+
+		if (this.frameBufferSize.width != requiredFrameBufferWidth || 
+			this.frameBufferSize.height != requiredFrameBufferHeight) {
+
+			this.frameBufferSize.width = requiredFrameBufferWidth;
+			this.frameBufferSize.height = requiredFrameBufferHeight;
+
+			let canvasContainer = document.getElementById('sms-canvas-container');
+			canvasContainer.innerHTML = 
+				'<canvas ' + 
+				'	id="sms-canvas" ' + 
+				'	style="image-rendering: pixelated; image-rendering: -moz-crisp-edges;" ' + 
+				'	width="' + this.frameBufferSize.width + '" height="' + this.frameBufferSize.height + '">' + 
+				'</canvas>';
+
+			this.scaleCanvas();
+
+			this.canvas = document.getElementById('sms-canvas');
+			this.canvasContext = this.canvas.getContext('2d');
+
+			this.frameBufferImageData = this.canvasContext.createImageData(
+				this.frameBufferSize.width, 
+				this.frameBufferSize.height); 
+
+			this.frameBuffer = new Uint32Array(this.frameBufferImageData.data.buffer);
+		}
+	}
+
+	this.scaleCanvas = function () {
+
+		if (this.frameBufferSize.width > 0 && this.frameBufferSize.height > 0) {
+			let canvasContainer = document.getElementById('sms-canvas-container');
+
+			let canvasScaleX = Math.floor(window.innerWidth / this.frameBufferSize.width);
+			let canvasScaleY = Math.floor(window.innerHeight / this.frameBufferSize.height);
+			let canvasScale = canvasScaleX < canvasScaleY ? canvasScaleX : canvasScaleY;
+
+			canvasContainer.style.width = (this.frameBufferSize.width * canvasScale) + 'px';
+			canvasContainer.style.height = (this.frameBufferSize.height * canvasScale) + 'px';
+			canvasContainer.style.marginTop = ((window.innerHeight - (this.frameBufferSize.height * canvasScale)) / 2) + 'px';
+		}
+	}
+
+	this.enterFullscreen = function () {
+
+		let element = document.getElementById("sms-canvas"); 
+
+		if (element.requestFullscreen) {
+			element.requestFullscreen();
+		} else if (element.mozRequestFullScreen) {
+			element.mozRequestFullScreen();
+		} else if (element.webkitRequestFullscreen) {
+			element.webkitRequestFullscreen();
+		} else if (element.msRequestFullscreen) {
+			element.msRequestFullscreen();
 		}
 	}
 
@@ -151,17 +240,51 @@ function Vdp() {
 
 		let raiseInterrupt = false;
 
+		this.checkFrameBuffer();
+
+		// Update line-mode specific variables.
+		this.vCounterJumpOnScanlineIndex = 219;
+		this.vCounterJumpToIndex = 213;
+		this.interruptAfterScanlineIndex = 192;
+		this.nameTableHeight = 28;
+		this.nameTableBaseAddressMask = 0x0e;
+		this.nameTableBaseAddressOffset = 0;
+		this.visibleScanlineCount = 192;
+		this.stopDrawingSpritesWhenLine208IsFound = true;
+
+		if (this.modeSettings.displayMode == 4 && this.modeSettings.enableExtendedLineModes) {
+			if (this.modeSettings.lineMode == VDP_LINE_MODE_224) {
+				this.vCounterJumpOnScanlineIndex = 235;
+				this.vCounterJumpToIndex = 229;
+				this.interruptAfterScanlineIndex = 224;
+				this.nameTableHeight = 32;
+				this.nameTableBaseAddressMask = 0x0c;
+				this.nameTableBaseAddressOffset = 0x700;
+				this.visibleScanlineCount = 224;
+				this.stopDrawingSpritesWhenLine208IsFound = false;
+			} else if (this.modeSettings.lineMode == VDP_LINE_MODE_240) {
+				this.vCounterJumpOnScanlineIndex = 256;
+				this.vCounterJumpToIndex = 0;
+				this.interruptAfterScanlineIndex = 240;
+				this.nameTableHeight = 32;
+				this.nameTableBaseAddressMask = 0x0c;
+				this.nameTableBaseAddressOffset = 0x700;
+				this.visibleScanlineCount = 240;
+				this.stopDrawingSpritesWhenLine208IsFound = false;
+			}
+		}
+
 		// Render the scanline all in one go.
 		if (this.modeSettings.displayEnabled &&
-			this.currentScanlineIndex < VDP_VISIBLE_SCANLINE_COUNT_NTSC) {
+			this.currentScanlineIndex < this.visibleScanlineCount) {
 
 			this.generateScanLine();
 		}
 
 		// Increment the v-counter. 
-		// The v-counter jumps back after 0xda, so that its value still fits into a byte at the end of the frame.
-		if (this.currentScanlineIndex == 219) {
-			this.vCounter = 0xd5;
+		// The v-counter jumps back on certain lines, so that its value still fits into a byte at the end of the frame.
+		if (this.currentScanlineIndex == this.vCounterJumpOnScanlineIndex) {
+			this.vCounter = this.vCounterJumpToIndex;
 		} else {
 			this.vCounter++;
 			this.vCounter &= 0xff;
@@ -192,13 +315,13 @@ function Vdp() {
 		// status flag is set on scanline 192, so you'd assume that the interrupt
 		// would be raised at the same time. However, Zool doesn't work unless you
 		// raise the interrupt on the scanline after, which is how MEKA seems to do it.
-		if (this.currentScanlineIndex == 192) {
+		if (this.currentScanlineIndex == this.interruptAfterScanlineIndex) {
 
 			// Set the frame-interrupt-pending status flag.
 			this.statusFlags |= BIT7;
 		}
 
-		if (this.currentScanlineIndex == 193 && 
+		if (this.currentScanlineIndex == this.interruptAfterScanlineIndex + 1 && 
 			(this.statusFlags & BIT7) && 
 			this.modeSettings.frameInterruptEnabled) {
 
@@ -223,20 +346,6 @@ function Vdp() {
 	this.presentFrame = function () {
 
 		this.canvasContext.putImageData(this.frameBufferImageData, 0, 0);
-	}
-
-	this.setCanvasContext = function (canvasContext) {
-
-		this.canvasContext = canvasContext;
-
-		this.frameBufferSize.width = 256; // FIXME - constant
-		this.frameBufferSize.height = 192; // FIXME - constant
-
-		this.frameBufferImageData = this.canvasContext.createImageData(
-			this.frameBufferSize.width, 
-			this.frameBufferSize.height); 
-
-		this.frameBuffer = new Uint32Array(this.frameBufferImageData.data.buffer);
 	}
 
 	this.setCpu = function (cpu) {
@@ -359,19 +468,24 @@ function Vdp() {
 			this.modeSettings.enableLineInterrupts = (byte & 0x10) != 0;
 			this.modeSettings.shiftSpritesLeftBy8Pixels = (byte & 0x08) != 0;
 			this.modeSettings.displayMode = (byte & 0x04) != 0 ? VDP_DISPLAY_MODE_4 : VDP_DISPLAY_MODE_UNKNOWN;
+			this.modeSettings.enableExtendedLineModes = (byte & 0x02) != 0;
 			this.modeSettings.displayIsMonochrome = (byte & 0x01) != 0;
 
 		} else if (registerIndex == VDP_REGISTER_INDEX_MODE_CONTROL_2) {
 
+			let m1 = (byte & 0x10) != 0;
+			let m3 = (byte & 0x08) != 0;
+
 			this.modeSettings.displayEnabled = (byte & 0x40) != 0;
 			this.modeSettings.frameInterruptEnabled = (byte & 0x20) != 0;
-			//this.modeSettings.lineMode: (byte & 0x10) != 0 && (byte & 0x08) != 0 ? VDP_LINE_MODE_192 : VDP_LINE_MODE_UNKNOWN;
+			this.modeSettings.lineMode = (byte & 0x08) != 0 ? VDP_LINE_MODE_240 : (byte & 0x10) != 0 ? VDP_LINE_MODE_224 : VDP_LINE_MODE_192;
 			this.modeSettings.useLargeSprites = (byte & 0x02) != 0;
 			this.modeSettings.spritePixelsAreDoubleSize = (byte & 0x01) != 0;
 		
 		} else if (registerIndex == VDP_REGISTER_INDEX_NAME_TABLE_BASE_ADDRESS) {
 
-			this.registers.nameTableBaseAddress = (byte & 0x0e) << 10;
+			//this.registers.nameTableBaseAddress = (byte & 0x0e) << 10;
+			this.registers.nameTableBaseAddress = byte;
 
 		} else if (registerIndex == VDP_REGISTER_INDEX_COLOR_TABLE_BASE_ADDRESS) {	
 
@@ -413,17 +527,19 @@ function Vdp() {
 
 	this.generateScanLine = function () {
 
-		let frameBufferData = this.frameBuffer.data;
-		let frameBufferIndex = this.currentScanlineIndex * this.frameBufferSize.width;
+		if (this.frameBuffer != null) {
+			let frameBufferData = this.frameBuffer.data;
+			let frameBufferIndex = this.currentScanlineIndex * this.frameBufferSize.width;
 
-		this.resetTileScanLineData()
+			this.resetTileScanLineData()
 
-		for (let x = 0; x < this.frameBufferSize.width; x++) {
+			for (let x = 0; x < this.frameBufferSize.width; x++) {
 
-			let colour = this.readNextScanLineColour();
+				let colour = this.readNextScanLineColour();
 
-			this.frameBuffer[frameBufferIndex] = this.colourLookup[colour];
-			frameBufferIndex++;
+				this.frameBuffer[frameBufferIndex] = this.colourLookup[colour];
+				frameBufferIndex++;
+			}
 		}
 	}
 
@@ -442,7 +558,7 @@ function Vdp() {
 
 		d.nameTableColumn = -Math.ceil(backgroundXScroll / 8) & 0x1f;
 
-		d.nameTableRow = Math.floor((this.currentScanlineIndex + this.registers.backgroundYScroll) / 8) % 28;
+		d.nameTableRow = Math.floor((this.currentScanlineIndex + this.registers.backgroundYScroll) / 8) % this.nameTableHeight;
 
 		d.loadTileData = true;
 
@@ -459,14 +575,14 @@ function Vdp() {
 
 		for (let i = 0; i < 64; i++) {
 			let spriteY = this.vram[this.registers.spriteAttributeTableBaseAddress + i];
-			if (spriteY == 0xd0) {
+			if (spriteY == 0xd0 && this.stopDrawingSpritesWhenLine208IsFound) {
 				break;
 			}
 
 			// Sprite Y coordinates start from scanline 1.
 			spriteY++;
 
-			if (spriteY > 0xd0) {
+			if (spriteY > 0xd0 && this.stopDrawingSpritesWhenLine208IsFound) {
 				spriteY -= 0x100;
 			}
 
@@ -555,7 +671,7 @@ function Vdp() {
 		let d = this.tileScanLineData;
 
 		let nameTableEntryAddress = 
-			this.registers.nameTableBaseAddress +
+			((this.registers.nameTableBaseAddress & this.nameTableBaseAddressMask) << 10) + this.nameTableBaseAddressOffset +
 			(d.nameTableRow << 6) +
 			(d.nameTableColumn << 1);
 
@@ -588,7 +704,6 @@ function Vdp() {
 
 		let spriteColourIndex = 0;
 
-		//for (let i = d.numberOfActiveSprites - 1; i >= 0; i--) {
 		for (let i = 0; i < d.numberOfActiveSprites; i++) {
 
 			let sprite = d.sprites[i];

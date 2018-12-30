@@ -16,18 +16,18 @@ function Sms() {
 	this.averageFrameDuration = 0;
 	this.totalFrameDuration = 0;
 	this.numberOfFrameRateDrops = 0;
-	this.canvas = null;
-	this.canvasContext = null;
+	//this.canvas = null;
+	//this.canvasContext = null;
 
 	this.init = function () {
 
-		this.canvas = document.getElementById('sms-canvas');
-		this.canvasContext = this.canvas.getContext('2d');
+		//this.canvas = document.getElementById('sms-canvas');
+		//this.canvasContext = this.canvas.getContext('2d');
 
 		this.cpu.setMmc(this.mmc);
 		this.cpu.setIoc(this.ioc);
 
-		this.vdp.setCanvasContext(this.canvasContext);
+		//this.vdp.setCanvasContext(this.canvasContext);
 		this.vdp.setCpu(this.cpu);
 
 		this.ioc.setVdp(this.vdp);
@@ -40,7 +40,7 @@ function Sms() {
 		this.mainLoop();
 	}
 
-	this.enterFullscreen = function () {
+	/*this.enterFullscreen = function () {
 
 		let element = document.getElementById("sms-canvas"); 
 
@@ -53,9 +53,23 @@ function Sms() {
 		} else if (element.msRequestFullscreen) {
 			element.msRequestFullscreen();
 		}
+	}*/
+
+	this.openMenu = function () {
+
+		let menu = document.getElementById('menu');
+		menu.style.display = 'block';
+	}
+
+	this.hideMenu = function () {
+
+		let menu = document.getElementById('menu');
+		menu.style.display = 'none';
 	}
 
 	this.loadRom = function () {
+
+		this.hideMenu();
 
 		this.isRunning = false;
 		this.cpu.reset();
@@ -71,7 +85,8 @@ function Sms() {
 
 			let reader = new FileReader();	
 			reader.onload = function (e) {
-				self.loadRomFromBytes(e.currentTarget.result);
+				let romBytes = new Uint8Array(e.currentTarget.result);
+				self.loadRomFromBytes(romBytes);
 			}
 			reader.readAsArrayBuffer(file);
 		}
@@ -123,7 +138,10 @@ function Sms() {
 			this.numberOfFrameRateDrops++;
 		}
 
-		document.getElementById('frameDuration').innerHTML = '' + (Math.round(this.averageFrameDuration * 100, 2) / 100) + 'ms (' + this.numberOfFrameRateDrops + ' drops)';
+		let frameDurationOutput = document.getElementById('frameDuration');
+		if (frameDurationOutput != null) {
+			frameDurationOutput.innerHTML = '' + (Math.round(this.averageFrameDuration * 100, 2) / 100) + 'ms (' + this.numberOfFrameRateDrops + ' drops)';
+		}
 	}
 
 	this.init();

@@ -5,7 +5,8 @@ function Mmc() {
 	this.romBanks = [];
 	this.mapperSlots = [];
 	this.mapperSlot2IsCartridgeRam = false;
-	this.stashedSystemRam = null;
+	this.romIsCodeMasters = false;
+	//this.stashedSystemRam = null;
 
 	this.init = function () {
 
@@ -43,23 +44,37 @@ function Mmc() {
 		}
 
 		this.mapperSlot2IsCartridgeRam = false;
-		this.stashedSystemRam = null;
+		this.romIsCodeMasters = false;
+		//this.stashedSystemRam = null;
 	}
 
 	this.loadRomFromBytes = function (romBytes) {
 
-		let byteArray = new Uint8Array(romBytes);    
-
 		// Some ROM dumping programs put a wierd 512 byte header at the beginning
 		// of the ROM. If this is detected, it needs to be stripped out.
-		let stripHeader = byteArray.length % 0x4000 == 512;
+		if (romBytes.length % 0x4000 == 512) {
+			let tempRomBytes = [];
+			for (let i = 512; i < romBytes.length; i++) {
+				tempRomBytes.push(romBytes[i]);
+			}
 
+			romBytes = tempRomBytes;
+		}
+
+		// Check if this is a CodeMasters ROM.
+		let checksum1 = (romBytes[0x7fe7] << 8) | romBytes[0x7fe6];
+		let checksum2 = (romBytes[0x7fe9] << 8) | romBytes[0x7fe8];
+		this.romIsCodeMasters = 0x10000 - checksum1 == checksum2;
+
+		// Load the ROM into the banks.
     	let bankIndex = 0;
     	let bankByteIndex = 0;
 
-    	for (let i = stripHeader ? 512 : 0; i < byteArray.byteLength; i++) {
-      		this.romBanks[bankIndex][bankByteIndex] = byteArray[i];
+    	for (let i = 0; i < romBytes.length; i++) {
+
+      		this.romBanks[bankIndex][bankByteIndex] = romBytes[i];
       		bankByteIndex++;
+
       		if (bankByteIndex == MMC_ROM_BANK_SIZE) {
       			
       			bankIndex++;
@@ -72,9 +87,19 @@ function Mmc() {
       		}
 	    }
 
-	    // Default the mapper slots to banks 1 - 3.
-	    for (let i = 0; i < 3; i++) {
-			this.mapperSlots[i] = i < this.romBanks.length ? this.romBanks[i] : null;
+	    if (this.romIsCodeMasters) {
+
+	    	// In the CodeMasters mapper...
+	    	this.mapperSlots[0] = this.romBanks[0];
+	    	this.mapperSlots[1] = this.romBanks[1];
+	    	this.mapperSlots[2] = this.romBanks[0];
+
+	    } else {
+
+		    // In the Sega mapper, we default the mapper slots to banks 1 - 3.
+		    for (let i = 0; i < 3; i++) {
+				this.mapperSlots[i] = i < this.romBanks.length ? this.romBanks[i] : null;
+			}
 		}
 
 	    this.log('ROM loaded.');
@@ -86,8 +111,17 @@ function Mmc() {
 
 		if (address <= 0x03ff) {
 
-			// ROM (unpaged).
-			byte = this.romBanks[0][address];
+			if (this.romIsCodeMasters) {
+
+				// In the CodeMasters mapper, this maps to ROM slot 0.
+				let mapperSlot = this.mapperSlots[0];
+				byte = mapperSlot != null ? mapperSlot[address] : 0;
+
+			} else {
+
+				// In the SEGA mapper, this allows maps to ROM bank 0.
+				byte = this.romBanks[0][address];
+			}
 
 		} else if (address <= 0x3fff) {
 
@@ -144,15 +178,25 @@ function Mmc() {
 
 		if (address < 0x8000) {
 
-			// ROM mapper slots 0 - 1.
-			//throw 'Bad write address: ' + address.toString(16);
-			console.log('Bad write address: ' + address.toString(16));
+			if (this.romIsCodeMasters && address == 0x0000) {
+				this.setMapperSlot(0, byte);
+			} else if (this.romIsCodeMasters && address == 0x4000) {
+				this.setMapperSlot(1, byte);
+			} else {
+				// ROM mapper slots 0 and 1 - we can't write to this!
+				console.log('Bad write address: ' + address.toString(16));
+			}
 
 		} else if (address <= 0xbfff) {
 
-			// ROM/RAM mapper slot 2.
-			if (this.mapperSlot2IsCartridgeRam) {
+			if (this.romIsCodeMasters && address == 0x8000) {
+				this.setMapperSlot(2, byte);
+			} else if (this.mapperSlot2IsCartridgeRam) {
+				// ROM/RAM mapper slot 2.
 				this.cartridgeRam[address - 0x8000] = byte;
+			} else {
+				// We can't write to this!
+				console.log('Bad write address: ' + address.toString(16));
 			}
 
 		} else if (address <= 0xdfff) {
@@ -165,21 +209,23 @@ function Mmc() {
 			// System RAM mirror.
 			this.systemRam[address - 0xe000] = byte;
 
-			if (address == 0xfffc) {
+			if (!this.romIsCodeMasters) {
+				if (address == 0xfffc) {
 
-				this.setMapperControl(byte);
+					this.setMapperControl(byte);
 
-			} else if (address == 0xfffd) {
+				} else if (address == 0xfffd) {
 
-				this.setMapperSlot(0, byte);
+					this.setMapperSlot(0, byte);
 
-			} else if (address == 0xfffe) {
+				} else if (address == 0xfffe) {
 
-				this.setMapperSlot(1, byte);
-			
-			} else if (address == 0xffff) {
+					this.setMapperSlot(1, byte);
+				
+				} else if (address == 0xffff) {
 
-				this.setMapperSlot(2, byte);
+					this.setMapperSlot(2, byte);
+				}
 			}
 
 		} else {
@@ -252,7 +298,7 @@ function Mmc() {
 		document.getElementById('mem-dump').innerHTML = output;
 	}
 
-	this.stash = function () {
+	/*this.stash = function () {
 
 		this.stashedSystemRam = this.systemRam.slice();
 	}
@@ -268,7 +314,7 @@ function Mmc() {
 				}
 			}
 		}
-	}
+	}*/
 
 	this.log = function (message) {
 

@@ -19,7 +19,7 @@
 			color: #C1CAFF;
 		}
 
-		#sms-canvas-container {
+		/*#sms-canvas-container {
 			width: 256px; 
 			height: 192px;
 			margin-top: calc((100vh - 192px - 8px) / 2);
@@ -33,6 +33,11 @@
 			-webkit-box-shadow: 0px 0px 5px 5px rgba(0,0,0,0.75);
 			-moz-box-shadow: 0px 0px 5px 5px rgba(0,0,0,0.75);
 			box-shadow: 0px 0px 5px 5px rgba(0,0,0,0.75);
+		}*/
+
+		#sms-canvas-container {
+			margin-left: auto;
+			margin-right: auto;
 		}
 
 		#sms-canvas {
@@ -41,7 +46,7 @@
 			background-color: #000;
 		}
 
-		@media (min-width: 522px) and (min-height: 434px) {
+		/*@media (min-width: 522px) and (min-height: 434px) {
 			#sms-canvas-container {
 				width: 512px; height: 384px;
 				margin-top: calc((100vh - 384px - 8px) / 2);
@@ -67,7 +72,7 @@
 				width: 1280px; height: 960px;
 				margin-top: calc((100vh - 960px - 8px) / 2);
 			}
-		}
+		}*/
 
 		button {
 			background-color: #333333;
@@ -83,9 +88,51 @@
 			position: fixed;
 			top: 0px;
 			left: 0px;
-			background-color: #000;
 			box-sizing: border-box;
 			padding: 4px;
+		}
+
+		#menu {
+			position: fixed;
+			width: 100%;
+			height: 100px;
+			top: calc((100vh - 100px) / 2);
+			z-index: 10000;
+			display: none;
+			
+			/*width: 100%;
+			height: 31px;
+			position: fixed;
+			top: 0px;
+			left: 0px;
+			background-color: #000;
+			box-sizing: border-box;
+			padding: 4px;*/
+		}
+
+		.menu-inner {
+			width: 300px;
+			height: 100%;
+			margin-left: auto;
+			margin-right: auto;
+			border-radius: 10px;
+			background-color: #DBE4FF;
+			padding: 10px;
+			color: #000;
+
+			-webkit-box-shadow: 0px 0px 29px 5px rgba(158,224,255,1);
+			-moz-box-shadow: 0px 0px 29px 5px rgba(158,224,255,1);
+			box-shadow: 0px 0px 29px 5px rgba(158,224,255,1);
+		}
+
+		.menu-inner h1 {
+			color: #002A9E;
+			font-size: 20px;
+		}
+
+		.menu-inner h2 {
+			color: #002A9E;
+			font-size: 12px;
 		}
 
 		#mem-dump {
@@ -193,20 +240,28 @@
 <body>
 
 	<div id="tool-bar">
-		<h1>Andy's Sega Master System Emulator</h1>
-
-		<label for="romFileInput">Load ROM (.sms)</label>
-		<input type="file" id="romFileInput" onchange="sms.loadRom()" />
-		<button onclick="sms.enterFullscreen()">Full Screen</button>
-		<button onclick="sms.mmc.dump()">Dump RAM</button>
+		<button onclick="sms.openMenu()"><img src="img/menu.png" /></button>
+		<button onclick="sms.vdp.enterFullscreen()"><img src="img/full-screen.png" /></button>
+		<!--<button onclick="sms.mmc.dump()">Dump RAM</button>-->
 		<!--<button onclick="sms.mmc.stash()">Stash RAM</button>
 		<button onclick="sms.mmc.diffStash()">Diff RAM</button>-->
 		<!--<button onclick="sms.loadRom()">Load ROM</button>-->
-		Frame duration: <span id="frameDuration">-</span>
+		<!--Frame duration: <span id="frameDuration">-</span>-->
+	</div>
+
+	<div id="menu">
+		<div class="menu-inner">
+			<h1>JS Master System</h1>
+			<h2>Andy Holt 2018</h2>
+
+			<label for="romFileInput">Load ROM (.sms)</label>
+			<input type="file" id="romFileInput" onchange="sms.loadRom()" />
+
+		</div>
 	</div>
 
 	<div id="sms-canvas-container">
-		<canvas id="sms-canvas" style="image-rendering: pixelated; image-rendering: -moz-crisp-edges;" width="256" height="192"></canvas>
+		<!--<canvas id="sms-canvas" style="image-rendering: pixelated; image-rendering: -moz-crisp-edges;" width="256" height="192"></canvas>-->
 	</div>
 
 	<div data-role="onscreen-gamepad" class="onscreen-gamepad">
@@ -224,15 +279,15 @@
 
 	<pre id="mem-dump"></pre>
 
-	<script src="js/sms.js?noCache=9"></script>
-	<script src="js/cpu.js?noCache=9"></script>
-	<script src="js/mmc.js?noCache=9"></script>
-	<script src="js/ioc.js?noCache=9"></script>
-	<script src="js/vdp.js?noCache=9"></script>
-	<script src="js/input.js?noCache=9"></script>
-	<script src="js/audio.js?noCache=9"></script>
-	<script src="js/util.js?noCache=9"></script>
-	<script src="js/const.js?noCache=9"></script>
-	<script src="js/start.js?noCache=9"></script>
+	<script src="js/sms.js?noCache=10"></script>
+	<script src="js/cpu.js?noCache=10"></script>
+	<script src="js/mmc.js?noCache=10"></script>
+	<script src="js/ioc.js?noCache=10"></script>
+	<script src="js/vdp.js?noCache=10"></script>
+	<script src="js/input.js?noCache=10"></script>
+	<script src="js/audio.js?noCache=10"></script>
+	<script src="js/util.js?noCache=10"></script>
+	<script src="js/const.js?noCache=10"></script>
+	<script src="js/start.js?noCache=10"></script>
 </body>
 </html>
