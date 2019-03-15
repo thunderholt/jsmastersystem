@@ -11,23 +11,16 @@ function Sms() {
 	this.util = new Util();
 
 	this.isRunning = false;
-	//this.totalCyclesExecuted = 0;
 	this.totalFramesRendered = 0;
 	this.averageFrameDuration = 0;
 	this.totalFrameDuration = 0;
 	this.numberOfFrameRateDrops = 0;
-	//this.canvas = null;
-	//this.canvasContext = null;
 
 	this.init = function () {
-
-		//this.canvas = document.getElementById('sms-canvas');
-		//this.canvasContext = this.canvas.getContext('2d');
 
 		this.cpu.setMmc(this.mmc);
 		this.cpu.setIoc(this.ioc);
 
-		//this.vdp.setCanvasContext(this.canvasContext);
 		this.vdp.setCpu(this.cpu);
 
 		this.ioc.setVdp(this.vdp);
@@ -39,21 +32,6 @@ function Sms() {
 
 		this.mainLoop();
 	}
-
-	/*this.enterFullscreen = function () {
-
-		let element = document.getElementById("sms-canvas"); 
-
-		if (element.requestFullscreen) {
-			element.requestFullscreen();
-		} else if (element.mozRequestFullScreen) {
-			element.mozRequestFullScreen();
-		} else if (element.webkitRequestFullscreen) {
-			element.webkitRequestFullscreen();
-		} else if (element.msRequestFullscreen) {
-			element.msRequestFullscreen();
-		}
-	}*/
 
 	this.openMenu = function () {
 
