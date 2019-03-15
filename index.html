@@ -95,8 +95,7 @@
 		#menu {
 			position: fixed;
 			width: 100%;
-			height: 100px;
-			top: calc((100vh - 100px) / 2);
+			top: 100px;
 			z-index: 10000;
 			display: none;
 			
@@ -133,6 +132,15 @@
 		.menu-inner h2 {
 			color: #002A9E;
 			font-size: 12px;
+		}
+
+		.menu-inner button {
+			margin-bottom: 10px;
+			width: 100%;
+		}
+
+		.menu-inner button:last-child {
+			margin-bottom: 0px;
 		}
 
 		#mem-dump {
@@ -255,7 +263,13 @@
 			<h2>Andy Holt 2018</h2>
 
 			<label for="romFileInput">Load ROM (.sms)</label>
-			<input type="file" id="romFileInput" onchange="sms.loadRom()" />
+			<input type="file" id="romFileInput" onchange="sms.loadRom('file')" />
+
+			<hr />
+
+			<button onclick="sms.loadRom('sonic-the-hedgehog.sms')">Load 'Sonic The Hedgehog'</button><br />
+			<button onclick="sms.loadRom('alex-kidd-in-miracle-world.sms')">Load 'Alex Kidd In Miracle World'</button><br />
+			<button onclick="sms.loadRom('land-of-illusion.sms')">Load 'Land Of Illusion'</button>
 
 		</div>
 	</div>

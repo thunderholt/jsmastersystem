@@ -45,7 +45,7 @@ function Sms() {
 		menu.style.display = 'none';
 	}
 
-	this.loadRom = function () {
+	this.loadRom = function (source) {
 
 		this.hideMenu();
 
@@ -56,17 +56,36 @@ function Sms() {
 		this.audio.reset();
 		this.input.reset();
 
-		var romFileInput = document.getElementById('romFileInput');
+		if (source == 'file') {
 
-		if (romFileInput.files.length > 0) {
-			let file = romFileInput.files[0];
+			var romFileInput = document.getElementById('romFileInput');
 
-			let reader = new FileReader();	
-			reader.onload = function (e) {
-				let romBytes = new Uint8Array(e.currentTarget.result);
-				self.loadRomFromBytes(romBytes);
+			if (romFileInput.files.length > 0) {
+				let file = romFileInput.files[0];
+
+				let reader = new FileReader();	
+				reader.onload = function (e) {
+					let romBytes = new Uint8Array(e.currentTarget.result);
+					self.loadRomFromBytes(romBytes);
+				}
+				reader.readAsArrayBuffer(file);
 			}
-			reader.readAsArrayBuffer(file);
+
+		} else {
+
+			var request = new XMLHttpRequest();
+			request.open('GET', '/roms/' + source, true);
+			request.responseType = 'arraybuffer';
+
+			request.onload = function (e) {
+				var arrayBuffer = request.response;
+				if (arrayBuffer != null) {
+					let romBytes = new Uint8Array(arrayBuffer);
+					self.loadRomFromBytes(romBytes);
+				}
+			};
+
+			request.send(null);
 		}
 	}
 
