@@ -74,7 +74,7 @@ function Sms() {
 		} else {
 
 			var request = new XMLHttpRequest();
-			request.open('GET', '/roms/' + source, true);
+			request.open('GET', 'roms/' + source, true);
 			request.responseType = 'arraybuffer';
 
 			request.onload = function (e) {
