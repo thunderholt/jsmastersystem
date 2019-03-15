@@ -19,22 +19,6 @@
 			color: #C1CAFF;
 		}
 
-		/*#sms-canvas-container {
-			width: 256px; 
-			height: 192px;
-			margin-top: calc((100vh - 192px - 8px) / 2);
-
-			margin-left: auto;
-			margin-right: auto;
-			display: block;
-			border: solid #333333 4px;
-			border-radius: 8px;
-
-			-webkit-box-shadow: 0px 0px 5px 5px rgba(0,0,0,0.75);
-			-moz-box-shadow: 0px 0px 5px 5px rgba(0,0,0,0.75);
-			box-shadow: 0px 0px 5px 5px rgba(0,0,0,0.75);
-		}*/
-
 		#sms-canvas-container {
 			margin-left: auto;
 			margin-right: auto;
@@ -45,34 +29,6 @@
 			height: 100%;
 			background-color: #000;
 		}
-
-		/*@media (min-width: 522px) and (min-height: 434px) {
-			#sms-canvas-container {
-				width: 512px; height: 384px;
-				margin-top: calc((100vh - 384px - 8px) / 2);
-			}
-		}
-
-		@media (min-width: 778px) and (min-height: 626px) {
-			#sms-canvas-container {
-				width: 768px; height: 576px;
-				margin-top: calc((100vh - 576px - 8px) / 2);
-			}
-		}
-
-		@media (min-width: 1034px) and (min-height: 818px) {
-			#sms-canvas-container {
-				width: 1024px; height: 768px;
-				margin-top: calc((100vh - 768px - 8px) / 2);
-			}
-		}
-
-		@media (min-width: 1380px) and (min-height: 1100px) {
-			#sms-canvas-container {
-				width: 1280px; height: 960px;
-				margin-top: calc((100vh - 960px - 8px) / 2);
-			}
-		}*/
 
 		button {
 			background-color: #333333;
@@ -98,15 +54,6 @@
 			top: 100px;
 			z-index: 10000;
 			display: none;
-			
-			/*width: 100%;
-			height: 31px;
-			position: fixed;
-			top: 0px;
-			left: 0px;
-			background-color: #000;
-			box-sizing: border-box;
-			padding: 4px;*/
 		}
 
 		.menu-inner {
@@ -274,9 +221,7 @@
 		</div>
 	</div>
 
-	<div id="sms-canvas-container">
-		<!--<canvas id="sms-canvas" style="image-rendering: pixelated; image-rendering: -moz-crisp-edges;" width="256" height="192"></canvas>-->
-	</div>
+	<div id="sms-canvas-container"></div>
 
 	<div data-role="onscreen-gamepad" class="onscreen-gamepad">
 		<div class="onscreen-gamepad-dpad">
